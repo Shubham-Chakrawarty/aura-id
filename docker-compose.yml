@@ -1,0 +1,23 @@
+services:
+  aura-db:
+    image: postgres:16-alpine
+    container_name: aura-postgres-db
+    restart: always
+    environment:
+      POSTGRES_USER: aura_admin
+      POSTGRES_PASSWORD: aura_password
+      POSTGRES_DB: aura_auth_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - aura_data:/var/lib/postgresql/data
+
+  aura-cache:
+    image: redis:7-alpine
+    container_name: aura-cache
+    restart: always
+    ports:
+      - "6379:6379"
+    command: redis-server --save 60 1 --loglevel warning
+volumes:
+  aura_data:
