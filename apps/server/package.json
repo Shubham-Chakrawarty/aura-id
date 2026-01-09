@@ -1,0 +1,22 @@
+{
+  "name": "@aura/server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@aura/types": "workspace:*"
+  },
+  "devDependencies": {
+    "@aura/typescript-config": "workspace:*",
+    "@aura/eslint-config": "workspace:*",
+    "tsx": "^4.0.0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.25.0"
+}

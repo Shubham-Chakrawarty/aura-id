@@ -1,0 +1,5 @@
+{
+  "extends": "@aura/typescript-config/dom.json",
+  "include": ["src"],
+  "exclude": ["node_modules"]
+}

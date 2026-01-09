@@ -1,15 +1,17 @@
 {
   "name": "aura-id",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "private": true,
+  "type": "module",
   "scripts": {
-    "lint": "pnpm -r lint",
-    "typecheck": "pnpm -r typecheck",
-    "build": "pnpm -r build"
+    "lint": "eslint . --max-warnings 0 && pnpm -r --if-present run lint",
+    "typecheck": "pnpm -r --if-present run typecheck",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\""
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "packageManager": "pnpm@10.25.0"
+  "devDependencies": {
+    "@aura/eslint-config": "workspace:*",
+    "eslint": "^9.39.2",
+    "typescript": "^5.9.3",
+    "prettier": "^3.7.4"
+  }
 }

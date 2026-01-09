@@ -1,0 +1,15 @@
+{
+  "name": "@aura/types",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@aura/eslint-config": "workspace:*",
+    "@aura/typescript-config": "workspace:*"
+  }
+}

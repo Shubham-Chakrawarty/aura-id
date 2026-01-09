@@ -1,0 +1,10 @@
+{
+  "name": "@aura/typescript-config",
+  "version": "1.0.0",
+  "private": true,
+  "files": [
+    "base.json",
+    "server.json",
+    "dom.json"
+  ]
+}
