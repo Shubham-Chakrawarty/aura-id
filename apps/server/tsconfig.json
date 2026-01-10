@@ -1,6 +1,11 @@
 {
   "extends": "@aura/typescript-config/server.json",
   "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "target": "ES2023",
+    "strict": true,
+    "esModuleInterop": true,
     "outDir": "dist",
     "rootDir": "src"
   },

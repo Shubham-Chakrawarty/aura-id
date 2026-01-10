@@ -8,6 +8,11 @@ build
 .next
 .turbo
 
+# Ignore generated prisma client
+apps/server/src/generated/
+node_modules/
+dist/
+
 # coverage & logs
 coverage
 *.log
