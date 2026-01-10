@@ -4,6 +4,7 @@
   "type": "module",
   "private": true,
   "exports": {
+    ".": "./base.js",
     "./base": "./base.js",
     "./server": "./server.js",
     "./react": "./react.js"
