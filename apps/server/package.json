@@ -8,7 +8,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@aura/types": "workspace:*"
+    "@aura/shared": "workspace:*"
   },
   "devDependencies": {
     "@aura/typescript-config": "workspace:*",

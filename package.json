@@ -4,12 +4,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "lint": "eslint . --max-warnings 0 && pnpm -r --if-present run lint",
+    "lint": "pnpm -r --if-present run lint",
     "typecheck": "pnpm -r --if-present run typecheck",
-    "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\""
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "build":"pnpm -r --if-present run build",
+    "dev": "pnpm -r --if-present run dev"
   },
   "devDependencies": {
-    "@aura/eslint-config": "workspace:*",
     "eslint": "^9.39.2",
     "typescript": "^5.9.3",
     "prettier": "^3.7.4"

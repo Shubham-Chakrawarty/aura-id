@@ -1,4 +1,4 @@
-import { User } from '@aura/types';
+import { User } from '@aura/shared';
 
 const testUser: User = {
   id: 'test-123',
