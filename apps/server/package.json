@@ -5,23 +5,33 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "tsx src/index.ts",
+    "dev": "tsx watch src/index.ts",
+    "build": "tsup",
+    "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
     "postinstall": "prisma generate"
   },
   "dependencies": {
     "@aura/shared": "workspace:*",
     "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^7.2.0",
+    "@types/express": "^5.0.6",
     "dotenv": "^17.2.3",
-    "pg": "^8.16.3"
+    "express": "^5.2.1",
+    "argon2": "^0.44.0",
+    "cors": "^2.8.5",
+    "pg": "^8.16.3",
+    "zod": "^4.3.5"
   },
   "devDependencies": {
     "@aura/eslint-config": "workspace:*",
     "@aura/typescript-config": "workspace:*",
     "@types/node": "^22.19.5",
     "@types/pg": "^8.16.0",
+    "@types/cors": "^2.8.19",
     "prisma": "^7.2.0",
+    "tsup": "^8.5.1",
     "tsx": "^4.0.0"
   },
   "keywords": [],
