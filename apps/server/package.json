@@ -13,7 +13,8 @@
   "devDependencies": {
     "@aura/typescript-config": "workspace:*",
     "@aura/eslint-config": "workspace:*",
-    "tsx": "^4.0.0"
+    "tsx": "^4.0.0",
+    "@types/node": "^22.10.0"
   },
   "keywords": [],
   "author": "",
