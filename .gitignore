@@ -6,6 +6,7 @@ Thumbs.db
 node_modules/
 jspm_packages/
 .pnpm-debug.log*
+src/generated/
 
 # --- Environment / Secrets ---
 .env
