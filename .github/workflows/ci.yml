@@ -30,6 +30,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Generate Prisma Client for the server app
+      - name: Generate Prisma Client
+        run: pnpm --filter @aura/server exec prisma generate
+
       # Check Formatting (Prettier)
       - name: Format Check
         run: pnpm format:check
