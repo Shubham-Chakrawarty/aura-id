@@ -2,7 +2,6 @@ import { env } from './config/env.js';
 import { prisma } from './lib/prisma.js';
 import { app } from './server.js';
 
-/* eslint-disable no-console */
 async function bootstrap() {
   try {
     // 1. Initialize Prisma Connection

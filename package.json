@@ -10,6 +10,8 @@
     "format:check": "prettier --check .",
     "build": "pnpm -r --if-present run build",
     "dev": "pnpm -r --if-present run dev",
+    "test": "pnpm -r --if-present run test",
+    "test:watch": "pnpm -r --if-present run test:watch",
     "ci-test": "pnpm install && pnpm format && pnpm lint && pnpm typecheck && pnpm build"
   },
   "devDependencies": {
