@@ -1,6 +1,6 @@
+import { env } from '@/config/env.js';
 import { NextFunction, Request, Response } from 'express';
 
-/* eslint-disable no-console */
 export const globalErrorHandler = (
   err: Error & { statusCode?: number; code?: string; details?: unknown },
   req: Request,
@@ -23,7 +23,7 @@ export const globalErrorHandler = (
       code,
       details: err.details || null,
       // Only show stack trace in development mode!
-      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
+      stack: env.NODE_ENV === 'development' ? err.stack : undefined,
     },
     meta: {
       timestamp: new Date().toISOString(),

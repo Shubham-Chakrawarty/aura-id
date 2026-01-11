@@ -1,0 +1,22 @@
+version: '3.9'
+
+services:
+  postgres_test:
+    image: postgres:16-alpine
+    container_name: aura-postgres-db-test
+    ports:
+      - '5435:5432'
+    environment:
+      POSTGRES_USER: aura_admin_test
+      POSTGRES_PASSWORD: aura_password_test
+      POSTGRES_DB: aura_auth_db_test
+    # Run DB in memory for lightning fast tests
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U aura_admin_test -d aura_auth_db_test']
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
