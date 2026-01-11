@@ -1,8 +1,8 @@
-import { prisma } from "@/lib/prisma.js";
+import { prisma } from '@/lib/prisma.js';
 
 export const resetDb = async () => {
   const tablenames = await prisma.$queryRawUnsafe<Array<{ tablename: string }>>(
-    `SELECT tablename FROM pg_tables WHERE schemaname = 'public'`
+    `SELECT tablename FROM pg_tables WHERE schemaname = 'public'`,
   );
 
   const tables = tablenames

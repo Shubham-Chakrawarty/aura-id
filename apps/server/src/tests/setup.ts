@@ -7,7 +7,10 @@ beforeAll(async () => {
     // Standard push without the obsolete flag
     execSync('npx prisma db push', { env: process.env });
   } catch (error) {
-    console.error('Database sync failed. Ensure your test Docker container is running on port 5435.', error);
+    console.error(
+      'Database sync failed. Ensure your test Docker container is running on port 5435.',
+      error,
+    );
     process.exit(1);
   }
 });

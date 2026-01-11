@@ -26,11 +26,13 @@ describe('Register Module Integration Tests', () => {
       expect(response.body).toMatchObject({
         success: true,
         data: { email: payload.email },
-        meta: { timestamp: expect.any(String) }
+        meta: { timestamp: expect.any(String) },
       });
 
       // Verification: Check DB directly (Triple A Pattern: Arrange, Act, Assert)
-      const dbUser = await prisma.user.findUnique({ where: { email: payload.email } });
+      const dbUser = await prisma.user.findUnique({
+        where: { email: payload.email },
+      });
       expect(dbUser).not.toBeNull();
       expect(dbUser?.passwordHash).not.toBe(payload.password); // Verify hashing
     });
@@ -43,7 +45,9 @@ describe('Register Module Integration Tests', () => {
         { scenario: 'missing firstName', data: { firstName: '' } },
       ])('should return 400 for $scenario', async ({ data }) => {
         const payload = createRegisterData(data);
-        const response = await request(app).post('/api/auth/register').send(payload);
+        const response = await request(app)
+          .post('/api/auth/register')
+          .send(payload);
 
         expect(response.status).toBe(400);
         expect(response.body.success).toBe(false);
@@ -57,7 +61,9 @@ describe('Register Module Integration Tests', () => {
       await request(app).post('/api/auth/register').send(payload);
 
       // Second registration (Conflict)
-      const response = await request(app).post('/api/auth/register').send(payload);
+      const response = await request(app)
+        .post('/api/auth/register')
+        .send(payload);
 
       expect(response.status).toBe(409);
       expect(response.body.success).toBe(false);
