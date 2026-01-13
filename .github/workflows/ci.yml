@@ -56,8 +56,8 @@ jobs:
         run: pnpm --filter @aura/server exec prisma generate
 
       # Check Formatting (Prettier)
-      - name: Format Check
-        run: pnpm format:check
+      - name: Format & Auto-fix
+        run: pnpm format
 
       # Check Code Style (Linter)
       - name: Lint Check
