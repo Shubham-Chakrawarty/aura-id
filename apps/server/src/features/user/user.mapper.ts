@@ -1,5 +1,5 @@
-import { User } from '@/generated/prisma/client.js';
 import { SafeUser } from '@aura/shared/user';
+import { User } from '@generated/prisma/index.js';
 
 export const toSafeUser = (user: User, clientId: string): SafeUser => {
   const metadata = user.metadata as Record<string, unknown>;

@@ -2,7 +2,7 @@ import auraServerConfig from '@aura/eslint-config/server';
 
 export default [
   {
-    ignores: ['dist/', 'node_modules/', 'src/generated/**/*'],
+    ignores: ['dist/', 'node_modules/', 'generated/**/*'],
   },
   ...auraServerConfig,
   {

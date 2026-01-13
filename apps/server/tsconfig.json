@@ -10,7 +10,8 @@
     "rootDir": "src",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@generated/*": ["generated/*"]
     },
     "types": ["node", "express", "vitest/globals"]
   },
