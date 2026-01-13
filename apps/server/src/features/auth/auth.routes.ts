@@ -1,8 +1,10 @@
-import { validate } from '@/middlewares/validate.middleware.js';
-import { registerBaseSchema } from '@aura/shared/auth';
+import { validateBody } from '@/middlewares/validateBody.middleware.js';
+import { loginRequestSchema, registerRequestSchema } from '@aura/shared/auth';
 import { Router } from 'express';
-import { registerHandler } from './auth.controller.js';
+import { login } from './login/login.controller.js';
+import { register } from './register/register.controller.js';
 
 export const authRouter: Router = Router();
 
-authRouter.post('/register', validate(registerBaseSchema), registerHandler);
+authRouter.post('/register', validateBody(registerRequestSchema), register);
+authRouter.post('/login', validateBody(loginRequestSchema), login);

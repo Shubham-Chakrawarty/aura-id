@@ -6,21 +6,26 @@ import {
   strongPasswordSchema,
 } from '../../primitives/index.js';
 
-// Login Schema
-export const loginSchema = z.object({
+// Login Request Schema
+export const loginRequestSchema = z.object({
   email: emailSchema,
   password: passwordSchema,
+  clientId: z.string().min(1, 'Client ID is required'),
 });
 
-export const registerBaseSchema = z.object({
+// Register Request Schema
+export const registerRequestSchema = z.object({
   firstName: nameSchema,
   lastName: nameSchema,
   email: emailSchema,
   password: strongPasswordSchema,
+  clientId: z.string().min(1, 'Client ID is required'),
+  metadata: z.record(z.string(), z.any()).optional(),
+  avatarUrl: z.string().url('Invalid avatar URL').optional(),
 });
 
-// Signup Schema
-export const registerSchema = registerBaseSchema
+// Register Form Schema
+export const registerFormSchema = registerRequestSchema
   .extend({
     confirmPassword: passwordSchema,
   })

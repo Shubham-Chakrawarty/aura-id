@@ -1,12 +1,12 @@
 import z from 'zod';
 import {
-  loginSchema,
-  registerBaseSchema,
-  registerSchema,
+  loginRequestSchema,
+  registerFormSchema,
+  registerRequestSchema,
 } from './auth.schema.js';
 
-export type LoginInput = z.infer<typeof loginSchema>;
+export type LoginRequest = z.infer<typeof loginRequestSchema>;
 
-export type RegisterInput = z.infer<typeof registerSchema>;
+export type RegisterFormValues = z.infer<typeof registerFormSchema>;
 
-export type RegisterBaseInput = z.infer<typeof registerBaseSchema>;
+export type RegisterRequest = z.infer<typeof registerRequestSchema>;

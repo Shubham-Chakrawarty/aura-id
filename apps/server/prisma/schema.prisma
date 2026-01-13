@@ -1,27 +1,63 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
 }
 
-
 model User {
-  id            String    @id @default(uuid())
-  email         String    @unique
-  passwordHash  String
-  firstName     String
-  lastName      String
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  // Core
+  id           String  @id @default(uuid())
+  email        String  @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  avatarUrl    String?
+
+  // Account Status
+  isActive        Boolean @default(true)
+  isEmailVerified Boolean @default(false)
+
+  // Security & Auditing (The "Senior" touch)
+  lastLoginAt  DateTime?
+  blockedUntil DateTime? // For rate-limiting/brute-force protection
+
+  // Additional Info
+  metadata Json @default("{}")
+
+  // Relations
+  refreshTokens RefreshToken[]
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
 
   @@index([email])
+  @@map("users")
+}
+
+model RefreshToken {
+  id       String @id @default(uuid())
+  token    String @unique @db.Text
+  userId   String
+  clientId String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Security: Token Rotation & Revocation
+  isRevoked  Boolean @default(false)
+  replacedBy String? // Link to the new token ID in the rotation chain
+
+  // Device/Context Info (Crucial for "Security" tabs in UI)
+  userAgent String? @db.Text
+  ipAddress String?
+
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([token])
+  @@index([clientId])
+  @@unique([userId, clientId, userAgent])
+  @@map("refresh_tokens")
 }

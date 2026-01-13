@@ -3,7 +3,7 @@ import { formatZodError } from '@/utils/zod-format.js';
 import { NextFunction, Request, Response } from 'express';
 import { ZodError, ZodType } from 'zod';
 
-export const validate = <T>(schema: ZodType<T>) => {
+export const validateBody = <T>(schema: ZodType<T>) => {
   return async (
     req: Request<Record<string, never>, unknown, T>,
     res: Response,

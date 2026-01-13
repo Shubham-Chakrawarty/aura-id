@@ -1,25 +1,36 @@
+import { toSafeUser } from '@/features/user/user.mapper.js';
 import { sendSuccess } from '@/utils/response.js';
-import { RegisterBaseInput } from '@aura/shared/auth';
+import { RegisterRequest } from '@aura/shared/auth';
 import { NextFunction, Request, Response } from 'express';
-import { toSafeUser } from '../user/user.mapper.js';
 import { registerUser } from './register.service.js';
 
-export const registerHandler = async (
-  req: Request<Record<string, never>, unknown, RegisterBaseInput>,
+export const register = async (
+  req: Request<Record<string, never>, unknown, RegisterRequest>,
   res: Response,
   next: NextFunction,
 ) => {
   try {
-    const { email, password, firstName, lastName } = req.body;
+    const {
+      email,
+      password,
+      firstName,
+      lastName,
+      clientId,
+      metadata,
+      avatarUrl,
+    } = req.body;
     const { user } = await registerUser({
       email,
       password,
       firstName,
       lastName,
+      clientId,
+      metadata,
+      avatarUrl,
     });
     return sendSuccess(res, {
       message: 'Registration successful. Please verify your email.',
-      data: toSafeUser(user),
+      data: toSafeUser(user, clientId),
       statusCode: 201,
     });
   } catch (err) {

@@ -10,10 +10,11 @@
     "rootDir": "src",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@generated/*": ["generated/*"]
     },
     "types": ["node", "express", "vitest/globals"]
   },
-  "include": ["src"],
+  "include": ["src", "keys"],
   "exclude": ["node_modules"]
 }
