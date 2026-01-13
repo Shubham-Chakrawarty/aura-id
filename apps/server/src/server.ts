@@ -1,6 +1,6 @@
 import cors from 'cors';
 import express, { Express } from 'express';
-import { env } from './config/env.js';
+import { env } from './config/env.config.js';
 import { authRouter } from './features/auth/auth.routes.js';
 import { globalErrorHandler } from './middlewares/global-error.middleware.js';
 
@@ -25,7 +25,7 @@ app.get('/', (req, res) => {
 });
 
 // Routes
-app.use('/api/auth', authRouter);
+app.use('/api/v1/auth', authRouter);
 
 // 4. Global Error Handler (Must be last)
 app.use(globalErrorHandler);

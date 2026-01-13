@@ -2,9 +2,9 @@ import { findUserByEmail } from '@/features/user/user.service.js';
 import { hashPassword } from '@/lib/password.js';
 import { prisma } from '@/lib/prisma.js';
 import { AppError } from '@/utils/app-error.js';
-import { RegisterBaseInput } from '@aura/shared/auth';
+import { RegisterRequest } from '@aura/shared/auth';
 
-export const registerUser = async (data: RegisterBaseInput) => {
+export const registerUser = async (data: RegisterRequest) => {
   const existingUser = await findUserByEmail(data.email);
   if (existingUser) {
     throw new AppError(
@@ -20,14 +20,29 @@ export const registerUser = async (data: RegisterBaseInput) => {
   return { user: newUser };
 };
 
-export const createUnverifiedUser = async (data: RegisterBaseInput) => {
-  const { password, ...rest } = data;
+export const createUnverifiedUser = async (data: RegisterRequest) => {
+  const {
+    password,
+    email,
+    firstName,
+    lastName,
+    clientId,
+    metadata,
+    avatarUrl,
+  } = data;
   const hashedPassword = await hashPassword(password);
+
+  // Nest the metadata under the clientId key to prevent overwriting
+  const userMetadata = clientId ? { [clientId]: metadata || {} } : {};
 
   return await prisma.user.create({
     data: {
-      ...rest,
+      email,
+      firstName,
+      lastName,
       passwordHash: hashedPassword,
+      metadata: userMetadata,
+      avatarUrl: avatarUrl || null,
     },
   });
 };

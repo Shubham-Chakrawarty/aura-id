@@ -1,4 +1,4 @@
-import { env } from '@/config/env.js';
+import { env } from '@/config/env.config.js';
 import { PrismaPg } from '@prisma/adapter-pg';
 import 'dotenv/config';
 import pg from 'pg';
