@@ -1,6 +1,6 @@
 # ADR 003: Continuous Integration with GitHub Actions
 
-- **Status:** Accepted
+- **Status:** `Accepted`
 - **Date:** 2026-01-10
 - **Deciders:** @shubham-chakrawarty
 - **Scope:** DevOps / Infrastructure

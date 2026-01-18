@@ -1,6 +1,6 @@
 # ADR 004: Database Schema and Persistence Layer
 
-- **Status:** Accepted
+- **Status:** `Accepted`
 - **Date:** 2026-01-11
 - **Deciders:** @shubham-chakrawarty
 - **Scope:** Backend / Infrastructure

@@ -1,6 +1,6 @@
 # ADR 001: Initial Tech Stack & Architecture
 
-- **Status:** Accepted
+- **Status:** `Accepted`
 - **Date:** 2026-01-08
 - **Deciders:** @shubham-chakrawarty
 - **Scope:** Cross-cutting / Infrastructure

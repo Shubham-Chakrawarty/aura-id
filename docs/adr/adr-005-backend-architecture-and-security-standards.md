@@ -1,6 +1,6 @@
 # ADR 005: Backend Architecture and Security Standards
 
-- **Status:** Accepted
+- **Status:** `Accepted`
 - **Date:** 2026-01-11
 - **Deciders:** @shubham-chakrawarty
 - **Scope:** Backend / Security

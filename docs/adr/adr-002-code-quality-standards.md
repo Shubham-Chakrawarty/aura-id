@@ -1,6 +1,6 @@
 # ADR 002: Code Quality Standards
 
-- **Status:** Accepted
+- **Status:** `Accepted`
 - **Date:** 2026-01-09
 - **Deciders:** @shubham-chakrawarty
 - **Scope:** Tooling / Developer Experience
