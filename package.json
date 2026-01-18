@@ -27,6 +27,8 @@
     "docker:down:test": "docker compose -f docker-compose.test.yml down"
   },
   "devDependencies": {
+    "@commitlint/cli": "^20.3.1",
+    "@commitlint/config-conventional": "^20.3.1",
     "eslint": "^9.39.2",
     "husky": "^8.0.0",
     "lint-staged": "^16.2.7",
