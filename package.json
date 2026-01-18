@@ -16,11 +16,31 @@
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
     "docker:up:test": "docker compose -f docker-compose.test.yml up -d",
-    "docker:down:test": "docker compose -f docker-compose.test.yml down"
+    "docker:down:test": "docker compose -f docker-compose.test.yml down",
+    "prepare": "husky install"
   },
   "devDependencies": {
     "eslint": "^9.39.2",
-    "typescript": "^5.9.3",
-    "prettier": "^3.7.4"
+    "husky": "^8.0.0",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
+  },
+  "lint-staged": {
+    "apps/server/**/*.{js,ts}": [
+      "pnpm -F @auraid/server lint --fix",
+      "prettier --write"
+    ],
+    "apps/auth-portal/**/*.{js,ts,jsx,tsx}": [
+      "pnpm -F @auraid/auth-portal lint --fix",
+      "prettier --write"
+    ],
+    "packages/**/*.{js,ts}": [
+      "pnpm -r --filter \"./packages/**\" lint --fix",
+      "prettier --write"
+    ],
+    "**/*.{json,md}": [
+      "prettier --write"
+    ]
   }
 }

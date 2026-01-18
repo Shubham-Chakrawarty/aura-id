@@ -9,7 +9,7 @@
     "build": "tsup",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint .",
+    "lint": "eslint",
     "postinstall": "prisma generate",
     "test": "dotenv -e .env.test -- vitest run",
     "test:watch": "dotenv -e .env.test -- vitest",
