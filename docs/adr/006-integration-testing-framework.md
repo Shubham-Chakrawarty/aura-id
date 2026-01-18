@@ -1,80 +1,54 @@
 # ADR 006: Selection of Vitest and Supertest for Integration Testing
 
-## Status
+- **Status:** Accepted
+- **Date:** 2026-01-11
+- **Deciders:** @shubham-chakrawarty
+- **Scope:** Quality Assurance / DevOps
+- **Related**: [[003-continous-integration.md]]
 
-Accepted
+---
 
-## Date
+### 1. Context
 
-2026-01-11
+AuraID’s core value is **Trust**. Because we handle sensitive identity logic (Password hashing, JWT issuance, and Membership scoping), unit tests alone are insufficient. We must verify that our Controllers, Services, and Prisma Models work together in a real environment. We need a testing suite that is fast enough for local development but rigorous enough to catch breaking changes in our **Single User, Multi-Context** logic during CI.
 
-## Context
+### 2. Decision
 
-AuraID requires reliable automated testing to verify critical backend flows such as:
+We will implement an **Integration-First Testing Strategy** using **Vitest** and **Supertest**.
 
-- User Registration
-- Login
-- Email Verification
+### **Technical Specifics**
 
-Given our setup (TypeScript monorepo, Express, Prisma, PostgreSQL), the testing solution must:
+- **Test Runner:** **Vitest** (configured with workspace support).
+- **HTTP Assertions:** **Supertest** for high-level API testing.
+- **Database Isolation:** A dedicated **Test Database** (e.g., `auraid_test`) managed via Docker.
+- **Test Lifecycle:**
+  - **Setup:** Before tests, run Prisma migrations on the test DB.
+  - **Teardown:** Truncate tables between test suites to ensure a "Clean Slate."
+- **Strategy:** Focus on **E2E Integration** for critical paths:
+  - `POST /auth/register` (Registration flow)
+  - `POST /auth/login` (Token issuance)
+  - `GET /apps/:id/members` (Scoped access check)
 
-- Support TypeScript out-of-the-box
-- Execute quickly in a CI/CD pipeline (GitHub Actions)
-- Enable **integration testing** by hitting real HTTP routes
-- Work with a real database without risking development data
+### 3. Rationale
 
-## Decision
+- **Vitest Speed:** Vitest shares the same transformation pipeline as Vite and `esbuild`. In a monorepo, it is significantly faster than Jest because it doesn't need to re-compile TypeScript from scratch for every file change.
+- **Supertest + Express:** Supertest allows us to pass our Express `app` instance directly to the runner. This tests the **entire request lifecycle**—including Zod validation, security headers, and error middleware—without needing to bind the server to a real network port.
+- **Real DB vs. Mocks:** Mocks often hide bugs (e.g., a foreign key constraint failing). By using a real PostgreSQL test database, we ensure that our Prisma schemas and migrations are actually correct.
+- **Jest Compatibility:** Vitest uses the same `describe/expect` syntax as Jest, allowing us to use familiar patterns while gaining modern performance.
 
-1. **Test Runner**
-   - Use **Vitest** as the primary test runner.
+### 4. Consequences
 
-2. **HTTP Testing**
-   - Use **Supertest** for making HTTP assertions against the Express API.
+- **Positive:**
+  - **High Reliability:** We test the app exactly as it will run in production.
+  - **Developer Velocity:** Vitest's "Watch Mode" provides near-instant feedback as you code.
+  - **CI Safety:** **ADR-003 (GitHub Actions)** will now fail if any core identity flow is broken, preventing faulty builds.
+- **Negative/Risks:**
+  - **Infrastructure Complexity:** The CI environment must now spin up a Postgres container specifically for tests.
+  - **State Management:** We must be disciplined about clearing the database to prevent "leaky tests" (where one test fails because of data left by another).
+- **Mitigation:**
+  - Use a global `vitest.setup.ts` file to handle database truncation and environment variable overrides automatically.
 
-3. **Database Strategy**
-   - Use a **separate PostgreSQL database/container** for tests to ensure isolation from development data.
+### 5. Notes / Artifacts
 
-## Rationale
-
-### Vitest
-
-- Uses `esbuild` under the hood for near-instant test execution.
-- Native TypeScript support with minimal configuration.
-- Jest-compatible API provides familiarity without sacrificing speed.
-- Excellent developer experience with fast watch mode.
-
-### Supertest
-
-- Industry-standard library for testing Node.js HTTP servers.
-- Allows requests to be made directly against the Express app instance.
-- Eliminates the need to manually start and stop the server for each test.
-- Ideal for validating real middleware, routing, and request handling.
-
-### Database Isolation
-
-- Prevents accidental mutation or deletion of development data.
-- Enables repeatable and deterministic test runs.
-- Mirrors production behavior more closely than mocks.
-
-## Consequences
-
-### Positive
-
-- High confidence in core authentication flows.
-- Fast feedback loop during development and CI runs.
-- Tests exercise real application behavior instead of mocked logic.
-
-### Negative
-
-- Requires additional setup for test-specific configuration.
-- Test database must be managed and cleaned between runs.
-
-## Setup Notes
-
-- A `vitest.config.ts` file is required in `apps/server`.
-- A dedicated `.env.test` file must be used to point Prisma to the test database.
-- CI must provision the test database before running tests.
-
-## Notes
-
-This testing approach prioritizes **realism over mocking**, ensuring AuraID’s most critical flows behave correctly in production-like conditions.
+- **Reference:** This ADR fulfills the verification requirements for **ADR-005** (Backend Standards).
+- **File Location:** `apps/server/vitest.config.ts`.

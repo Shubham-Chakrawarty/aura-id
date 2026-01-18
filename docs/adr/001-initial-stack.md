@@ -1,77 +1,58 @@
 # ADR 001: Initial Tech Stack & Architecture
 
-## Status
+- **Status:** Accepted
+- **Date:** 2026-01-08
+- **Deciders:** @shubham-chakrawarty
+- **Scope:** Cross-cutting / Infrastructure
 
-Proposed
+---
 
-## Context
+### 1. Context
 
-AuraID is intended to be a standalone Identity Provider (IdP) for centralized authentication across multiple services.
+AuraID is designed to be a standalone Identity Provider (IdP) responsible for centralized authentication across multiple applications. Unlike a simple login system, this must handle **Global Identities** (one "Passport" per human) that access various **Application-Scoped Contexts** (Visas/Memberships). We require a stack that is secure by default, scales with minimal friction, and enforces a **Zero Trust** model (User + Application + Membership + Session verification).
 
-The system must:
+### 2. Decision
 
-- Be secure by default
-- Scale with minimal architectural changes
-- Be developer-friendly for both integrators and maintainers
+We will adopt a **Hybrid Integration Model** utilizing a modern TypeScript monorepo (`pnpm` workspaces) to maintain a single source of truth across all components.
 
-## Decision
+### **Architecture Components**
 
-### 1. Architecture Model
+- **Hosted Authentication Portal:** A centralized React/Vite application for secure, redirect-based login flows (SSO).
+- **Headless SDK:** A logic-only package (`packages/sdk`) for internal services to handle session verification and context maintenance without UI overhead.
+- **Server Core:** An Express.js API following a feature-based architecture.
 
-- **Decision:** Adopt a **Hybrid Integration Model** consisting of:
-  - A **Hosted Authentication Portal** (redirect-based)
-  - A **Headless SDK** (API-only)
+### **Core Infrastructure**
 
-### 2. Token & Password Security
+- **Persistence:** **PostgreSQL** via **Prisma ORM**. All core entities (User, Application, Membership) must include mandatory **Soft Deletes** (`deletedAt`) to preserve audit trails.
+- **Cache & Security State:** **Redis** for real-time session tracking, token revocation lists (blacklisting), and fast security lookups.
 
-- **Decision:** Use **RS256 (asymmetric signing)** for JWTs.
-- **Decision:** Use **Argon2id** for password hashing.
+### **Security Primitives**
 
-### 3. Infrastructure Components
+- **Token Signing:** **RS256 (Asymmetric)** using the `jose` library. The IdP signs with a private key; apps verify with a public key.
+- **Hashing:** **Argon2id** for user passwords, providing memory-hard resistance against GPU/ASIC attacks.
+- **Cookie Strategy:** `HttpOnly`, `Secure`, `SameSite=Lax` with proactive rotation to mitigate XSS and CSRF.
 
-- **Decision:** Use **Redis** alongside **PostgreSQL**.
+### 3. Rationale
 
-### 4. Programming Language
+- **Hybrid Model (Portal + SDK):** This provides the best of both worlds. The Portal ensures security-sensitive logic (like password entry) stays on a domain we control, while the SDK allows developers to integrate AuraID into their own codebases with a few lines of code.
+- **RS256 vs HS256:** In a multi-app ecosystem, sharing a "secret key" (HS256) with every client app is a massive security risk. RS256 allows us to share only a **Public Key**, meaning even if a client app is compromised, the attacker cannot forge AuraID tokens.
+- **Argon2id:** We are choosing the winner of the Password Hashing Competition. It is more secure than Bcrypt or Scrypt against modern hardware-accelerated attacks.
+- **Redis for Session Scoping:** While JWTs are great for being stateless, they are hard to "cancel." By tracking sessions in Redis, we can implement **Scoped Logout** (killing a session for one app while keeping the user logged into others) and a "Global Kill Switch" for compromised accounts.
+- **Monorepo (pnpm + Shared Packages):** To follow the **DRY (Don't Repeat Yourself)** principle, we will use `packages/shared` for our Zod schemas. This ensures the Auth Portal, the Server, and the SDK all agree on the exact shape of a "User" or a "Login Request" at compile-time.
 
-- **Decision:** Use **TypeScript** across the entire stack.
+### 4. Consequences
 
-## Rationale
+- **Positive:**
+  - **Industry Standard Security:** Using RS256 and Argon2id puts us in the top tier of secure IdPs.
+  - **Developer Velocity:** Shared types and the Headless SDK reduce integration friction for new apps.
+  - **Data Integrity:** Soft deletes ensure that we never lose historical identity data, which is crucial for security audits.
+- **Negative/Risks:**
+  - **Increased Complexity:** Managing a monorepo, a relational DB, and a cache layer requires a more sophisticated DevOps setup from the start.
+  - **Performance Overhead:** RS256 signing is slightly more CPU-intensive than HS256, and Redis adds a network hop for session checks.
+- **Mitigation:**
+  - Use **Dockerized environments** to ensure all developers have identical Postgres/Redis setups.
+  - Implement **Vitest/Supertest** for rigorous CI testing to catch contract breaks in the monorepo early.
 
-### Hybrid Integration Model
+### 5. Notes / Artifacts
 
-- The hosted portal allows applications to integrate authentication quickly with minimal configuration.
-- The headless SDK enables fully custom authentication flows while centralizing security-critical logic in a maintained library.
-
-### RS256 & Argon2id
-
-- **RS256:** Enables applications to verify tokens using a public key without exposing the private signing key, reducing blast radius.
-- **Argon2id:** A memory-hard hashing algorithm designed to resist GPU and ASIC attacks.
-
-### Redis
-
-- Enables fast token revocation and session invalidation without querying the primary database on every request.
-- Supports real-time security features such as logout and token blacklisting.
-
-### TypeScript
-
-- Shared type definitions between the server, SDK, and frontend prevent contract mismatches.
-- Type errors surface at development time rather than at runtime.
-
-## Consequences
-
-### Positive
-
-- Strong security guarantees with industry-standard cryptography.
-- Flexible integration options for different application needs.
-- Reduced runtime errors due to shared type contracts.
-- Clear separation of responsibilities across system components.
-
-### Negative
-
-- Higher initial setup complexity compared to simple auth solutions.
-- Additional infrastructure (Redis) introduces operational overhead.
-
-## Notes
-
-This architecture prioritizes **security, correctness, and long-term maintainability** over initial simplicity.
-The design can evolve as usage patterns and scale become clearer.
+- Refer to `JOURNAL.md` for the step-by-step setup log.

@@ -1,55 +1,53 @@
 # ADR 002: Code Quality Standards
 
-## Status
+- **Status:** Accepted
+- **Date:** 2026-01-09
+- **Deciders:** @shubham-chakrawarty
+- **Scope:** Tooling / Developer Experience
 
-Accepted
+---
 
-## Context
+### 1. Context
 
-AuraID is a growing monorepo with multiple applications and shared packages.
-Without consistent code quality standards, the codebase risks becoming difficult to maintain and reason about over time.
+AuraID is a monorepo containing multiple applications (Auth Portal, Server) and shared packages (SDK, Shared Types). Without a unified set of rules for how code is written, formatted, and typed, the codebase will suffer from "consistency drift." This makes it harder to share code between packages and increases the likelihood of bugs being introduced simply because one package is less "strict" than another.
 
-We require a unified approach to code quality that:
+### 2. Decision
 
-- Enforces consistent rules across all packages
-- Prevents gradual degradation of code quality (“code rot”)
-- Scales cleanly as new packages and applications are added
+We will enforce a unified code quality baseline across the entire repository using three core tools.
 
-## Decision
+**1. TypeScript Configuration**
 
-1. **TypeScript**
-   - Enable **`strict` mode** as the baseline configuration for all packages.
-   - Provide tailored profiles for:
-     - `base`
-     - `server`
-     - `dom`
+- Enable **`strict` mode** as the global requirement.
+- Use a base configuration that is extended by specific packages (Server vs. DOM/React) to ensure consistent type-checking rules.
 
-2. **ESLint**
-   - Use a **centralized ESLint configuration package**.
-   - Provide tailored profiles for:
-     - `base`
-     - `server`
-     - `react`
+**2. ESLint for Static Analysis**
 
-3. **Prettier**
-   - Enforce a **single formatting standard at the repository root**.
-   - Apply formatting rules consistently across all applications and packages.
+- Implement a centralized ESLint configuration.
+- Define specific profiles for `base` logic, `server` (Node.js), and `react` (Frontend) to catch unsafe patterns early.
 
-## Consequences
+**3. Prettier for Formatting**
 
-### Positive
+- Define a single formatting standard in a `.prettierrc` file at the repository root.
+- All code across all packages must adhere to this single style to ensure clean Git diffs.
 
-- Consistent code style and structure across the entire monorepo.
-- Type errors and unsafe patterns are caught early during development.
-- New packages inherit established standards automatically.
-- Reduced long-term maintenance cost and technical debt.
+### 3. Rationale
 
-### Negative
+- **Standardization (DRY):** By centralizing these configs, we ensure that a "User" type in `packages/shared` is treated with the same level of strictness as it is in the `apps/server`.
+- **Type Safety:** Strict TypeScript is non-negotiable for an Identity Provider. It prevents common runtime errors like "undefined is not a function" which could crash our authentication flows.
+- **Developer Velocity:** Consistent formatting (Prettier) means developers don't waste time arguing over semicolons or tabs, and code reviews can focus on **logic** rather than **style**.
 
-- Developers must resolve linting and formatting issues before committing or merging changes.
-- Initial setup requires more configuration compared to ad-hoc tooling.
+### 4. Consequences
 
-## Notes
+- **Positive:**
+  - Consistent code style across all current and future applications.
+  - Type errors are caught at compile-time rather than in production.
+  - Simplified onboarding: any new package automatically inherits the AuraID quality bar.
+- **Negative/Risks:**
+  - **Initial Friction:** Developers must resolve all linting and type errors before code can be considered "done."
+  - **Configuration Overhead:** Maintaining centralized configs requires a small amount of extra work compared to default "out-of-the-box" settings.
+- **Mitigation:**
+  - Integrate these tools into the IDE (VS Code) to provide real-time feedback.
 
-This decision emphasizes **consistency and correctness** over short-term convenience.
-As the AuraID codebase grows, centralized code quality standards provide a stable foundation for collaboration and long-term maintainability.
+### 5. Notes / Artifacts
+
+- **Missing Automation:** This ADR defines the _standards_ but not the _enforcement_.

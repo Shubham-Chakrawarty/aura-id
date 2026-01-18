@@ -1,75 +1,51 @@
 # ADR 004: Database Schema and Persistence Layer
 
-## Status
+- **Status:** Accepted
+- **Date:** 2026-01-11
+- **Deciders:** @shubham-chakrawarty
+- **Scope:** Backend / Infrastructure
 
-Accepted
+---
 
-## Context
+### 1. Context
 
-AuraID requires a persistent data store for managing user identities and authentication-related data.
+AuraID requires a data store that prioritizes **integrity** and **traceability**. As an Identity Provider, we cannot afford "lost" data or orphaned records. We need a persistence layer that handles the complex relationships of our **Single User, Multi-Context** model (Users, Applications, and Memberships) while remaining performant in both local Docker environments and future cloud deployments.
 
-The persistence layer must:
+### 2. Decision
 
-- Integrate cleanly with a TypeScript-based monorepo
-- Ensure strong data integrity and transactional safety
-- Support efficient connection management
-- Be compatible with serverless and container-based deployments
+We will standardize on **PostgreSQL** managed through **Prisma v7** using the modern driver adapter pattern.
 
-## Decision
+### **Technical Specifics**
 
-1. **Database**
-   - Use **PostgreSQL** as the primary database.
-   - Use **Docker** for local development to ensure environment parity.
+- **Database Engine:** PostgreSQL (latest stable).
+- **ORM:** **Prisma v7** using `@prisma/adapter-pg` (to avoid the Rust engine overhead and improve cold starts).
+- **Schema Standards:**
+  - **Primary Keys:** UUID (v7 preferred for time-sortability, or v4).
+  - **Audit Fields:** Every table must include `createdAt`, `updatedAt`, and **`deletedAt`** (for Soft Deletes).
+- **Architecture:**
+  - **Singleton Pattern:** The Prisma client will be instantiated as a singleton in `apps/server` to prevent connection exhaustion.
+  - **Local Development:** Standardized via a `docker-compose.yml` defining the Postgres container.
 
-2. **ORM**
-   - Use **Prisma v7** with the `@prisma/adapter-pg` driver.
+### 3. Rationale
 
-3. **Primary Keys**
-   - Use **UUID (v4/v7)** as primary keys for all persisted entities.
+- **Prisma v7 + Adapter:** By using the `@prisma/adapter-pg`, we remove the heavy Rust binary. This makes our Docker images smaller and ensures that if we ever move to a Serverless environment (like Vercel or AWS Lambda), our "cold starts" are significantly faster.
+- **UUIDs:** In a distributed system or an IdP, we should never expose sequential IDs (like `User #1`). UUIDs prevent "ID Enumeration" attacks and allow for safer record merging across different database instances in the future.
+- **Soft Deletes (Blueprint Requirement):** Identity data is sensitive. We never physically `DELETE` rows. Using a `deletedAt` column ensures we can recover data and maintain foreign key integrity for historical audits.
+- **Singleton Client:** In Node.js, specifically with hot-reloading (Vite/Nodemon), every code change can create a new database connection. A Singleton ensures we stay within the connection limits of our PostgreSQL instance.
 
-4. **Connection Management**
-   - Use a **Singleton Prisma Client** to manage database connections and prevent resource leaks during development and hot reloads.
+### 4. Consequences
 
-## Rationale
+- **Positive:**
+  - **Strong Typing:** Prisma generates TypeScript types directly from our schema, eliminating the "SQL-to-Code" mapping errors.
+  - **Environment Parity:** Docker ensures that "it works on my machine" translates perfectly to "it works in production."
+  - **Audit-Ready:** Mandatory timestamps and soft deletes make the system compliant with standard security audit requirements.
+- **Negative/Risks:**
+  - **UUID Complexity:** Debugging via SQL queries is slightly harder with UUIDs than with simple integers (e.g., `1` vs `550e8400-e29b...`).
+  - **Soft Delete Logic:** Prisma does not support soft deletes out of the box; we must implement middleware or custom query logic to filter out "deleted" records.
+- **Mitigation:**
+  - Use **Prisma Middleware** or **Extended Clients** to automatically filter out records where `deletedAt != null`.
 
-### PostgreSQL
+### 5. Notes / Artifacts
 
-- Provides strong relational guarantees and mature indexing capabilities.
-- Well-supported within the Node.js and TypeScript ecosystem.
-
-### Prisma with `@prisma/adapter-pg`
-
-- Removes the dependency on the embedded Rust query engine.
-- Results in a lighter runtime and faster cold starts.
-- Improves compatibility with serverless environments.
-
-### UUIDs
-
-- Native PostgreSQL support with efficient indexing.
-- Fixed-size (16-byte) binary representation.
-- High collision resistance compared to string-based identifiers (e.g., CUIDs).
-
-### Singleton Prisma Client
-
-- Prevents excessive database connections during development reloads.
-- Reduces the risk of "Too many connections" errors.
-- Aligns with recommended Prisma usage patterns in long-running processes.
-
-## Consequences
-
-### Positive
-
-- Reliable and consistent data persistence.
-- Predictable database behavior across environments.
-- Improved performance and startup time for the server.
-- Reduced operational risk related to connection management.
-
-### Negative
-
-- UUIDs can be less human-readable than sequential identifiers.
-- Prisma introduces an abstraction layer that may hide some database-specific optimizations.
-
-## Notes
-
-This persistence strategy balances **performance, safety, and developer experience**.
-The approach can be revisited if scaling or deployment constraints change significantly.
+- This decision implements the **Core Identity Model** defined in the Project Blueprint.
+- **File Location:** `packages/database/prisma/schema.prisma`.

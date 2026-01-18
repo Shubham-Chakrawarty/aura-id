@@ -1,97 +1,53 @@
 # ADR 005: Backend Architecture and Security Standards
 
-## Status
+- **Status:** Accepted
+- **Date:** 2026-01-11
+- **Deciders:** @shubham-chakrawarty
+- **Scope:** Backend / Security
 
-Accepted
+---
 
-## Context
+### 1. Context
 
-AuraID requires a backend architecture that is secure, scalable, and maintainable over time.
+AuraID is a security-critical application. As an Identity Provider, the backend must not only be performant but also **resilient by design**. We need a structure that prevents common security pitfalls (like leaking stack traces), ensures that only "clean" data enters our system, and allows us to scale our feature set (Auth, Apps, Memberships) without creating a "Spaghetti" codebase.
 
-The backend must:
+### 2. Decision
 
-- Enforce strong password hashing standards
-- Provide consistent validation across environment variables and request data
-- Separate business logic from transport concerns
-- Standardize error handling across all services
-- Support fast and reliable builds within a TypeScript monorepo
+We will adopt a **Layered, Feature-Based Architecture** with a "Security First" validation layer.
 
-## Decision
+### **Technical Specifics**
 
-1. **Password Hashing**
-   - Use **Argon2id** (via the `argon2` library) for password hashing.
+- **Security Layer:** **Argon2id** for all password hashing. No legacy algorithms (Bcrypt/MD5) are permitted.
+- **Validation Layer:** **Zod** schemas for all "Entry Points" (Environment variables and Request bodies).
+- **Structural Pattern:** **Controller → Service → Model (Prisma)**.
+  - _Controller:_ Handles HTTP/Transport logic.
+  - _Service:_ Handles the "Business Rules" (e.g., _Is this user allowed to join this app?_).
+  - _Model:_ Handles data persistence.
+- **Organization:** Feature-based folders (e.g., `src/features/auth/*`, `src/features/users/*`) rather than generic `controllers/` or `services/` folders.
+- **Build System:** **tsup** (using `esbuild`) for bundling to ensure modern ESM output and lightning-fast build times.
+- **Error Strategy:** A centralized `ErrorHandler` middleware to catch all exceptions and format them into consistent JSON responses.
 
-2. **Validation Strategy**
-   - Use **Zod** for schema-based, fail-fast validation.
-   - Apply validation consistently to:
-     - Environment configuration
-     - Incoming HTTP request data
+### 3. Rationale
 
-3. **Code Structure**
-   - Adopt a **feature-based folder structure**.
-   - Use a **Layered Architecture**:
-     - Controller → Service → Model
+- **Argon2id:** Following the **OWASP Password Storage Cheat Sheet**, Argon2id is the current gold standard. It is specifically designed to resist GPU-based cracking, which is a critical requirement for a modern IdP.
+- **Zod for Fail-Fast Validation:** By validating at the very edge of the application (the request), we ensure that invalid data never reaches our business logic. This follows the **DRY** principle, as Zod types are inferred directly into our TypeScript interfaces.
+- **Feature-Based Structure:** In a "Multi-Context" system, code becomes unmanageable if all services live in one giant folder. Grouping by feature (e.g., `memberships`) makes it easier to find code and see the "Security Boundary" of each module.
+- **Layered Separation:** By keeping business logic in "Services," we can easily write unit tests for our identity logic without needing to mock HTTP requests or database connections (following **SOLID** principles).
+- **tsup/esbuild:** Standard `tsc` is too slow for large monorepos. `tsup` provides a professional bundling setup with minimal config, supporting "Hot Reloading" for a superior developer experience.
 
-4. **Naming Conventions**
-   - Use **domain-based file naming**, e.g.:
-     - `user.controller.ts`
-     - `user.service.ts`
+### 4. Consequences
 
-5. **Error Handling**
-   - Implement **class-based global error-handling middleware**.
-   - Clearly distinguish between:
-     - Operational errors
-     - Programmer (unexpected) errors
+- **Positive:**
+  - **High Security Bar:** Argon2id and strict Zod validation provide a robust defense against common attacks.
+  - **Maintainable Scale:** New developers can find features easily due to the domain-based folder structure.
+  - **Zero Leaks:** Centralized error handling ensures that internal database errors or stack traces are never exposed to the end-user.
+- **Negative/Risks:**
+  - **Boilerplate:** Creating a Controller, Service, and Schema for every feature takes more time than a simple Express route.
+  - **Learning Curve:** Developers must understand the distinction between "Operational" and "Programmer" errors.
+- **Mitigation:**
+  - Use code snippets or templates to quickly scaffold new features following this pattern.
 
-6. **Build Tooling**
-   - Use **tsup** for ESM bundling powered by `esbuild`.
+### 5. Notes / Artifacts
 
-## Rationale
-
-### Argon2id
-
-- Memory-hard algorithm resistant to GPU and ASIC attacks.
-- Recommended by OWASP as a modern password hashing standard.
-
-### Zod Validation
-
-- Provides runtime validation with static type inference.
-- Enables fail-fast behavior, reducing downstream error handling.
-- Ensures shared validation logic across packages.
-
-### Layered Architecture
-
-- Decouples HTTP and transport logic from business rules.
-- Improves testability and reusability of core services.
-- Makes refactoring and feature expansion safer over time.
-
-### Global Error Middleware
-
-- Ensures consistent JSON error responses.
-- Prevents leaking internal stack traces in production.
-- Centralizes error formatting and logging behavior.
-
-### tsup
-
-- Faster builds compared to `tsc`.
-- Minimal configuration for ESM output.
-- Well-suited for monorepo environments.
-
-## Consequences
-
-### Positive
-
-- Strong, standardized security practices across the backend.
-- Predictable validation and error-handling behavior.
-- Improved developer experience and maintainability.
-- Faster build times and simpler bundling configuration.
-
-### Negative
-
-- Additional architectural structure increases initial complexity.
-- Strict validation can surface more errors during early development.
-
-## Notes
-
-This backend architecture prioritizes **security, correctness, and clarity**.
-The design can be adapted as performance, scale, or deployment requirements evolve.
+- **Reference:** [OWASP Password Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html).
+- **Dependency:** Requires **ADR-004** (Database Schema) for the Service-to-Model interaction.

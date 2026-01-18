@@ -1,63 +1,50 @@
 # ADR 003: Continuous Integration with GitHub Actions
 
-## Status
+- **Status:** Accepted
+- **Date:** 2026-01-10
+- **Deciders:** @shubham-chakrawarty
+- **Scope:** DevOps / Infrastructure
 
-Accepted
+---
 
-## Context
+### 1. Context
 
-AuraID is a monorepo-based Identity Provider (IdP) consisting of multiple applications and shared packages, including:
+As AuraID follows a **Single User, Multi-Context** model, the logic in `packages/shared` (Zod schemas, types) is the glue holding the entire system together. A change in a shared type can silently break the `apps/auth-portal` while the `apps/server` remains valid. We need an automated "Safety Net" to ensure that every commit is verified against our **Code Quality Standards (ADR-002)** before it is merged.
 
-- `apps/server`
-- `apps/auth-portal`
-- `packages/shared`
+### 2. Decision
 
-To maintain high code quality and prevent **type drift** between the backend, frontend, and shared domain logic, we require an automated verification system.
+We will use **GitHub Actions** as our CI platform, leveraging **pnpm recursive commands** for task execution.
 
-The CI solution must:
+### **Technical Specifics**
 
-- Integrate natively with GitHub (where the codebase is hosted)
-- Support `pnpm` workspaces efficiently
-- Be cost-effective for a single-developer startup / side project
-- Enforce linting, type checking, and build validation on every change
+- **Triggers:** Run on every `push` to `main` and all `pull_request` events.
+- **Environment:** Ubuntu-latest runners using `pnpm/action-setup` for dependency management.
+- **Workflow Steps:**
+  1. **Dependency Install:** `pnpm install --frozen-lockfile` (ensures exact versions).
+  2. **Linting:** `pnpm -r lint` (recursive across all apps/packages).
+  3. **Type Checking:** `pnpm -r typecheck` (verifies TypeScript integrity).
+  4. **Build Validation:** `pnpm -r build` (ensures all packages are ready for deployment).
+- **Caching:** Utilize GitHub Actions cache for the pnpm store to reduce installation time.
 
-## Decision
+### 3. Rationale
 
-We will use **GitHub Actions** as the primary Continuous Integration platform for AuraID.
+- **Native pnpm Workspaces:** Using `pnpm -r` is the most direct way to interact with a monorepo. It removes the need for extra configuration files required by Turborepo or Nx, keeping the project "Lean."
+- **Cost-Efficiency:** GitHub Actions' free tier (2,000 mins/month) is more than enough for a solo developer. Managing an external CI like CircleCI or Jenkins would add unnecessary operational overhead.
+- **Standardization:** This follows our **DRY** principle—the same commands you run locally (`pnpm lint`) are the ones run in the cloud, ensuring no "it works on my machine" surprises.
 
-Instead of adopting advanced monorepo orchestration tools (such as Turborepo or Nx), we will rely on **pnpm’s native recursive workspace commands (`pnpm -r`)** to execute tasks across all packages.
+### 4. Consequences
 
-This approach keeps the CI pipeline:
+- **Positive:**
+  - **Contract Protection:** Prevents "Type Drift" between the Frontend and Backend.
+  - **Deterministic Integrity:** The `-frozen-lockfile` flag guarantees that CI builds are identical to local builds.
+  - **Visibility:** Build status badges and PR checks provide immediate feedback on code health.
+- **Negative/Risks:**
+  - **Lack of Remote Caching:** Without Turborepo, we cannot "skip" tasks that haven't changed. Every CI run rebuilds everything.
+  - **Future Bottleneck:** As the project grows, CI time will increase linearly with the number of packages.
+- **Mitigation:**
+  - Keep the dependency tree lean. If CI time exceeds 5 minutes, we will create a new ADR to adopt **Turborepo** for intelligent task orchestration.
 
-- Explicit and easy to reason about
-- Beginner-friendly without sacrificing professional rigor
-- Well-suited for the current size and complexity of AuraID
+### 5. Notes / Artifacts
 
-## Rationale
-
-### Why GitHub Actions?
-
-- **Zero Overhead:** No infrastructure or external CI servers to manage.
-- **Deep GitHub Integration:** CI results appear directly on pull requests and commits.
-- **First-Class pnpm Support:** `pnpm/action-setup` provides reliable installation and store caching.
-- **Secrets Management:** Secure handling of environment variables for future deployment stages.
-
-## Consequences
-
-### Positive
-
-- **Safety Net:** Every change is validated, preventing accidental breakage of shared types or contracts.
-- **Deterministic Builds:** `pnpm install --frozen-lockfile` ensures reproducible dependency resolution.
-- **Single Source of Truth:** CI configuration lives alongside the codebase in `.github/workflows/ci.yml`.
-- **Simplicity:** No additional abstraction layers in the build pipeline.
-
-### Negative
-
-- **Limited Caching:** Without Turborepo or Nx, all linting and build steps run on every CI execution.
-  For the current scale of AuraID, this is acceptable (expected runtime < 2 minutes).
-- **Execution Limits:** CI usage is constrained by GitHub’s free-tier limit (2,000 minutes/month), which is sufficient for this project.
-
-## Notes
-
-This decision prioritizes **clarity, determinism, and maintainability** over premature optimization.
-The CI strategy can be revisited if build times or repository scale increase significantly.
+- This ADR fulfills the "Automation" requirement mentioned in **ADR-002**.
+- **File Location:** `.github/workflows/ci.yml`.
