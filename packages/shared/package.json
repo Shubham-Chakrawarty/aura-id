@@ -12,7 +12,10 @@
     "./primitives": "./src/primitives/index.ts"
   },
   "scripts": {
-    "lint": "eslint",
+    "// --- Quality & Governance ---": "",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "lint:staged-fix": "eslint --fix",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

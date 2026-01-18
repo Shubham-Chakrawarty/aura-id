@@ -4,20 +4,27 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "// --- Core Workflow ---": "",
+    "dev": "pnpm -r --if-present run dev",
+    "build": "pnpm -r --if-present run build",
+    "prepare": "husky install",
+    "// --- Quality & Governance ---": "",
     "lint": "pnpm -r --if-present run lint",
-    "typecheck": "pnpm -r --if-present run typecheck",
+    "lint:fix": "pnpm -r --if-present run lint:fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "build": "pnpm -r --if-present run build",
-    "dev": "pnpm -r --if-present run dev",
+    "typecheck": "pnpm -r --if-present run typecheck",
+    "fix-all": "pnpm format && pnpm lint:fix",
+    "pre-commit": "lint-staged",
+    "// --- Testing ---": "",
     "test": "pnpm -r --if-present run test",
     "test:watch": "pnpm -r --if-present run test:watch",
-    "ci-test": "pnpm install && pnpm format && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "ci-test": "pnpm install && pnpm fix-all && pnpm typecheck && pnpm test && pnpm build",
+    "// --- Infrastructure (Docker) ---": "",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
     "docker:up:test": "docker compose -f docker-compose.test.yml up -d",
-    "docker:down:test": "docker compose -f docker-compose.test.yml down",
-    "prepare": "husky install"
+    "docker:down:test": "docker compose -f docker-compose.test.yml down"
   },
   "devDependencies": {
     "eslint": "^9.39.2",
@@ -27,20 +34,8 @@
     "typescript": "^5.9.3"
   },
   "lint-staged": {
-    "apps/server/**/*.{js,ts}": [
-      "pnpm -F @auraid/server lint --fix",
-      "prettier --write"
-    ],
-    "apps/auth-portal/**/*.{js,ts,jsx,tsx}": [
-      "pnpm -F @auraid/auth-portal lint --fix",
-      "prettier --write"
-    ],
-    "packages/**/*.{js,ts}": [
-      "pnpm -r --filter \"./packages/**\" lint --fix",
-      "prettier --write"
-    ],
-    "**/*.{json,md}": [
-      "prettier --write"
-    ]
+    "apps/**/*.{js,ts,jsx,tsx}": "pnpm -r --filter ./apps/** lint:staged-fix",
+    "packages/**/*.{js,ts,jsx,tsx}": "pnpm -r --filter ./packages/** lint:staged-fix",
+    "**/*.{js,ts,jsx,tsx,json,md}": "prettier --write"
   }
 }

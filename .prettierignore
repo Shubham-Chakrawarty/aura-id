@@ -1,5 +1,6 @@
 # dependencies
 node_modules
+.pnpm-store
 
 # build outputs
 dist
@@ -7,11 +8,11 @@ build
 .out
 .next
 .turbo
+.vercel
 
-# Ignore generated prisma client
-apps/server/src/generated/
-node_modules/
-dist/
+# Generated Code (This is what's causing your error)
+apps/server/generated
+**/generated/**
 
 # coverage & logs
 coverage
@@ -23,3 +24,12 @@ coverage
 
 # lockfiles (optional but common)
 pnpm-lock.yaml
+
+# Cache & Logs
+.husky
+.turbo
+*.log
+npm-debug.log*
+
+# Git
+.git
