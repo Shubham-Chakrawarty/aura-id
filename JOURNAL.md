@@ -1,3 +1,15 @@
+**[2026-01-20] Ref:** Issue #12 | ADR-003
+
+### Technical Hurdles & Resolutions
+
+- **Problem:** Prisma 7 + ESM Monorepo pathing issues. Specifically, the `MODULE_NOT_FOUND` error for `.prisma/client/default` and TypeScript's inability to see the generated client inside the `dist` folder.
+- **Resolution:** 1. **Standardized Output:** Configured `schema.prisma` to output to `../src/generated` to keep it within the TypeScript `rootDir`.
+
+2. **Barrel Export Pattern:** Split the database package into `lib/prisma.ts` (singleton logic), `utils/reset-db.ts` (helpers), and a central `index.ts` for clean public exports.
+3. **Watch Automation:** Added `tsc --watch` to the database package to automate the `src` -> `dist` compilation during development.
+
+---
+
 **[2026-01-18] Ref:** Issue #14 | ADR-007
 
 ### Technical Hurdles & Resolutions

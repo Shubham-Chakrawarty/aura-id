@@ -1,5 +1,5 @@
 import { authConfig } from '@/config/auth.config.js';
-import { prisma } from '@/lib/prisma.js';
+import { prisma } from '@aura/database';
 import { generateRefreshToken } from './token.service.js';
 
 export const createSession = async (

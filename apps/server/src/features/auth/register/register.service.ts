@@ -1,7 +1,7 @@
 import { findUserByEmail } from '@/features/user/user.service.js';
 import { hashPassword } from '@/lib/password.js';
-import { prisma } from '@/lib/prisma.js';
 import { AppError } from '@/utils/app-error.js';
+import { prisma } from '@aura/database';
 import { RegisterRequest } from '@aura/shared/auth';
 
 export const registerUser = async (data: RegisterRequest) => {

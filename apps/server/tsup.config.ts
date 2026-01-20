@@ -5,5 +5,5 @@ export default defineConfig({
   format: ['esm'],
   clean: true,
   sourcemap: true,
-  external: [/generated/, '@prisma/client'],
+  external: ['@prisma/client'],
 });

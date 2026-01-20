@@ -1,6 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
-  output   = "../generated/prisma"
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -55,9 +55,9 @@ model RefreshToken {
   expiresAt DateTime
   createdAt DateTime @default(now())
 
+  @@unique([userId, clientId, userAgent])
   @@index([userId])
   @@index([token])
   @@index([clientId])
-  @@unique([userId, clientId, userAgent])
   @@map("refresh_tokens")
 }
