@@ -6,7 +6,16 @@ export default {
     'scope-enum': [
       2,
       'always',
-      ['server', 'auth-portal', 'shared', 'deps', 'infra', 'docs'],
+      [
+        'server',
+        'auth-portal',
+        'shared',
+        'deps',
+        'infra',
+        'docs',
+        'tests',
+        'database',
+      ],
     ],
   },
 };
