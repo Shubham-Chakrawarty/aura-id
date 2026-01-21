@@ -1,0 +1,34 @@
+// 1. GLOBAL IDENTITY (The "Passport")
+model User {
+  // 1. Core Identity
+  id           String  @id @default(cuid())
+  email        String  @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  avatarUrl    String?
+
+  // 2. Account Status & Security
+  isActive        Boolean   @default(true)
+  isEmailVerified Boolean   @default(false)
+  blockedUntil    DateTime? // Protects against brute-force
+  lastLoginAt     DateTime?
+
+  // 3. Extensibility (The "Senior" Future-Proofing)
+  // Store things like "theme: dark" or "marketing_opt_in: true" here
+  metadata Json @default("{}")
+
+  // 4. Audit & Lifecycle
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // 5. Relationships
+  sessions           Session[]
+  refreshTokens      RefreshToken[]
+  memberships        ApplicationMembership[]
+  verificationTokens VerificationToken[]
+
+  @@index([email])
+  @@map("users")
+}
