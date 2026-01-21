@@ -1,7 +1,7 @@
-import { prisma } from '../index.js';
+import { prisma } from '../lib/prisma.js';
 
 export const resetDb = async () => {
-  // Guard against running in production
+  // Guard against running in production environment
   if (process.env.NODE_ENV === 'production') {
     throw new Error('resetDb cannot be run in production environment.');
   }
