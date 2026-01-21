@@ -1,6 +1,6 @@
-# ADR 004: Database Schema and Persistence Layer
+# ADR-004: Database Schema and Persistence Layer
 
-- **Status:** `Accepted`
+- **Status:** `Accepted` (Revised 2026-01-21)
 - **Date:** 2026-01-11
 - **Deciders:** @shubham-chakrawarty
 - **Scope:** Backend / Infrastructure
@@ -13,39 +13,36 @@ AuraID requires a data store that prioritizes **integrity** and **traceability**
 
 ### 2. Decision
 
-We will standardize on **PostgreSQL** managed through **Prisma v7** using the modern driver adapter pattern.
+We will standardize on **PostgreSQL** managed through **Prisma v7** using the modern driver adapter pattern and a **modular schema architecture**.
 
-### **Technical Specifics**
+**Technical Specifics**
 
-- **Database Engine:** PostgreSQL (latest stable).
-- **ORM:** **Prisma v7** using `@prisma/adapter-pg` (to avoid the Rust engine overhead and improve cold starts).
-- **Schema Standards:**
-  - **Primary Keys:** UUID (v7 preferred for time-sortability, or v4).
-  - **Audit Fields:** Every table must include `createdAt`, `updatedAt`, and **`deletedAt`** (for Soft Deletes).
-- **Architecture:**
-  - **Singleton Pattern:** The Prisma client will be instantiated as a singleton in `apps/server` to prevent connection exhaustion.
-  - **Local Development:** Standardized via a `docker-compose.yml` defining the Postgres container.
+- **Database Engine:** PostgreSQL (Latest stable).
+- **ORM:** **Prisma v7** using `@prisma/adapter-pg` to minimize engine overhead and cold starts.
+- **Schema Organization:** Modular structure using `previewFeatures = ["prismaSchemaFolder"]`. Every model resides in its own `.prisma` file (e.g., `user.prisma`, `application.prisma`).
+- **Primary Keys:** **CUID (v2)**. Chosen over UUID to ensure URL-friendliness and optimized B-Tree index performance (time-sortable).
+- **Audit Fields:** Every table must include `createdAt`, `updatedAt`, and `deletedAt` (Soft Deletes).
+- **Automation:** Use of `predev` and `prebuild` hooks (`pnpm db:generate`) to ensure the client is always synced with the modular schema.
+- **Singleton Pattern:** Prisma client instantiated via a global singleton to prevent connection exhaustion during Hot Module Replacement (HMR).
 
 ### 3. Rationale
 
-- **Prisma v7 + Adapter:** By using the `@prisma/adapter-pg`, we remove the heavy Rust binary. This makes our Docker images smaller and ensures that if we ever move to a Serverless environment (like Vercel or AWS Lambda), our "cold starts" are significantly faster.
-- **UUIDs:** In a distributed system or an IdP, we should never expose sequential IDs (like `User #1`). UUIDs prevent "ID Enumeration" attacks and allow for safer record merging across different database instances in the future.
-- **Soft Deletes (Blueprint Requirement):** Identity data is sensitive. We never physically `DELETE` rows. Using a `deletedAt` column ensures we can recover data and maintain foreign key integrity for historical audits.
-- **Singleton Client:** In Node.js, specifically with hot-reloading (Vite/Nodemon), every code change can create a new database connection. A Singleton ensures we stay within the connection limits of our PostgreSQL instance.
+- **Prisma Folder Structure:** Breaking the schema into `prisma/schema/*.prisma` prevents the "God File" anti-pattern, making the codebase maintainable as AuraID grows.
+- **CUID vs UUID:** CUIDs are chronologically sortable, preventing database "index fragmentation" which occurs with random UUID v4s. They are also more compact for URL-based verification links.
+- **Singleton Strategy:** Crucial for development environments. It stashes the instance in the `global` object to ensure we don't hit Postgres's `max_connections` during code reloads.
 
 ### 4. Consequences
 
 - **Positive:**
-  - **Strong Typing:** Prisma generates TypeScript types directly from our schema, eliminating the "SQL-to-Code" mapping errors.
-  - **Environment Parity:** Docker ensures that "it works on my machine" translates perfectly to "it works in production."
-  - **Audit-Ready:** Mandatory timestamps and soft deletes make the system compliant with standard security audit requirements.
+  - **Developer Experience:** Automated client generation via `predev` scripts ensures types are never out of sync.
+  - **Granular Review:** PRs become easier to read as schema changes are isolated to specific model files.
+  - **Security Audit-Ready:** Mandatory timestamps and soft deletes provide a permanent history for forensics.
 - **Negative/Risks:**
-  - **UUID Complexity:** Debugging via SQL queries is slightly harder with UUIDs than with simple integers (e.g., `1` vs `550e8400-e29b...`).
-  - **Soft Delete Logic:** Prisma does not support soft deletes out of the box; we must implement middleware or custom query logic to filter out "deleted" records.
+  - **Complexity:** Modular schemas are a "Preview Feature" in Prisma and require a specific folder structure.
+  - **Soft Delete Overhead:** We must remember to filter `deletedAt: null` in our queries or use a Prisma extension.
 - **Mitigation:**
-  - Use **Prisma Middleware** or **Extended Clients** to automatically filter out records where `deletedAt != null`.
+  - Standardize on a `BaseRepository` or **Prisma Extension** to automatically handle `deletedAt` filtering across all models.
 
 ### 5. Notes / Artifacts
 
-- This decision implements the **Core Identity Model** defined in the Project Blueprint.
-- **File Location:** `packages/database/prisma/schema.prisma`.
+- This revision supersedes the initial UUID v4 proposal in favor of CUID.

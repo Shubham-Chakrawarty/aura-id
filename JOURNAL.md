@@ -10,6 +10,10 @@
   - **Why:** In Node.js environments with Hot Module Replacement (HMR), re-instantiating `PrismaClient` on every file save would exhaust the Postgres connection pool.
   - **Impact:** The singleton pattern ensures only one connection pool exists across the entire application lifecycle, preventing "Too many connections" errors during development.
 
+  ***
+  - **Problem:** Deciding whether to persist user data before or after email verification.
+  - **Resolution:** Adopted a **"Persist-First"** strategy. Users are saved to the `users` table immediately with `isEmailVerified: false`. This ensures data integrity (Unique email constraints), enables "re-engagement" marketing, and simplifies the codebase by using the primary database as the single source of truth for all identity states.
+
 ---
 
 **[2026-01-20] Ref:** Issue #16 | ADR-003
