@@ -1,6 +1,5 @@
 import { app } from '@/server.js';
-import { resetDb } from '@/tests/helpers/reset-db.js';
-import { prisma } from '@aura/database';
+import { prisma, resetDb } from '@aura/database';
 import request from 'supertest';
 
 const createRegisterData = (overrides = {}) => ({
