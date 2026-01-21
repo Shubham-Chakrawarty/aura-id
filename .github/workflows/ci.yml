@@ -15,7 +15,9 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-
+    env:
+      # Defining it here makes it available to ALL steps below
+      DATABASE_URL: postgresql://aura_admin_test:aura_password_test@localhost:5435/aura_auth_db_test
     # needs: [set-up-environment]
     services:
       postgres:
