@@ -14,6 +14,13 @@
   - **Problem:** Deciding whether to persist user data before or after email verification.
   - **Resolution:** Adopted a **"Persist-First"** strategy. Users are saved to the `users` table immediately with `isEmailVerified: false`. This ensures data integrity (Unique email constraints), enables "re-engagement" marketing, and simplifies the codebase by using the primary database as the single source of truth for all identity states.
 
+  ***
+  - **Problem:** Attempted to use the multi-schema models instead of all models in one big file, but encountered pathing issues and "Cannot find modules” errors during execution and monorepo building. The multi-file schema was not correctly merging or being detected by the generator.
+  - **Resolution:** Fixed the configs and folder names according to Prisma v7 architecture.
+    1. Renamed the directory from `schema/` to `models/` (Keeping logic organised but not as the primary source).
+    2. Updated `packages/database/package.json` to point to the directory: `"prisma": { "schema": "./prisma" }`.
+    3. Updated `prisma.config.ts` to point to `./prisma` instead of `./prisma/schema.prisma`.
+
 ---
 
 **[2026-01-20] Ref:** Issue #16 | ADR-003
