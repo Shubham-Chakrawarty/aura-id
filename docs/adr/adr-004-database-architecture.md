@@ -1,4 +1,4 @@
-# ADR-004: Database Schema and Persistence Layer
+# ADR-004: Database Architecture
 
 - **Status:** `Accepted` (Revised 2026-01-21)
 - **Date:** 2026-01-11
@@ -19,7 +19,7 @@ We will standardize on **PostgreSQL** managed through **Prisma v7** using the mo
 
 - **Database Engine:** PostgreSQL (Latest stable).
 - **ORM:** **Prisma v7** using `@prisma/adapter-pg` to minimize engine overhead and cold starts.
-- **Schema Organization:** Modular structure using `previewFeatures = ["prismaSchemaFolder"]`. Every model resides in its own `.prisma` file (e.g., `user.prisma`, `application.prisma`).
+- **Schema Organization:** Every model resides in its own `.prisma` file (e.g., `user.prisma`, `application.prisma`).
 - **Primary Keys:** **CUID (v2)**. Chosen over UUID to ensure URL-friendliness and optimized B-Tree index performance (time-sortable).
 - **Audit Fields:** Every table must include `createdAt`, `updatedAt`, and `deletedAt` (Soft Deletes).
 - **Automation:** Use of `predev` and `prebuild` hooks (`pnpm db:generate`) to ensure the client is always synced with the modular schema.

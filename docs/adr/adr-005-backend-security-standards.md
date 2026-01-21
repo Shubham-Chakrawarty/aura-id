@@ -1,7 +1,7 @@
-# ADR 005: Backend Architecture and Security Standards
+# ADR 005: Backend Security Standards
 
 - **Status:** `Accepted`
-- **Date:** 2026-01-11
+- **Date:** 2026-01-11 (Revised 2026-01-21)
 - **Deciders:** @shubham-chakrawarty
 - **Scope:** Backend / Security
 
@@ -15,7 +15,7 @@ AuraID is a security-critical application. As an Identity Provider, the backend 
 
 We will adopt a **Layered, Feature-Based Architecture** with a "Security First" validation layer.
 
-### **Technical Specifics**
+#### Technical Specifics
 
 - **Security Layer:** **Argon2id** for all password hashing. No legacy algorithms (Bcrypt/MD5) are permitted.
 - **Validation Layer:** **Zod** schemas for all "Entry Points" (Environment variables and Request bodies).
@@ -35,7 +35,31 @@ We will adopt a **Layered, Feature-Based Architecture** with a "Security First" 
 - **Layered Separation:** By keeping business logic in "Services," we can easily write unit tests for our identity logic without needing to mock HTTP requests or database connections (following **SOLID** principles).
 - **tsup/esbuild:** Standard `tsc` is too slow for large monorepos. `tsup` provides a professional bundling setup with minimal config, supporting "Hot Reloading" for a superior developer experience.
 
-### 4. Consequences
+### 4. Security Protocol (The Handshake)
+
+- **Zero Trust Enforcement (The Quadruple Check)**
+  No request is trusted by default. Every incoming token must be validated against four pillars:
+  1. **User:** Is the account active and not blocked?
+  2. **Application:** Is the client ID registered and active?
+  3. **Membership:** Does the User have a valid "Visa" (Role) for this App?
+  4. **Session:** Is the specific Keycard (sid) still active and not revoked?
+  ***
+- **Cryptographic & Storage Standards**
+  - **Token Type:** RS256 Asymmetric JWTs. AuraID signs; Applications verify using the Public JWKS (JSON Web Key Set).
+  - **Cookie Policy:** `HttpOnly`, `Secure`, `SameSite=Lax` for all session-related identifiers.
+  - **CSRF Protection:** Mandatory `state` parameter check on all authorization redirects.
+  - **Grant Protection:** PKCE is required for all flows to mitigate code interception.
+  ***
+- **The "Self-Destruct" Logic (Token Rotation)**
+  - **Single-Use:** Refresh tokens are valid for one-time use only.
+  - **Breach Detection:** If an old Refresh Token is presented, AuraID flags a **Replay Attack**.
+  - **The Penalty:** The entire Session (all related tokens) is immediately marked `isRevoked: true`.
+  ***
+- **Scoped Session Control**
+  - **Logout is Local:** Terminating a session in App A kills the `Local Session` but preserves the `Global Identity` cookie (SSO).
+  - **Verification Scoping:** Tokens for Password Resets are scoped to the `ApplicationContext`. A reset link for App A cannot be used to gain access to App B.
+
+### 5. Consequences
 
 - **Positive:**
   - **High Security Bar:** Argon2id and strict Zod validation provide a robust defense against common attacks.
@@ -47,7 +71,6 @@ We will adopt a **Layered, Feature-Based Architecture** with a "Security First" 
 - **Mitigation:**
   - Use code snippets or templates to quickly scaffold new features following this pattern.
 
-### 5. Notes / Artifacts
+### 6. Notes / Artifacts
 
 - **Reference:** [OWASP Password Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html).
-- **Dependency:** Requires **ADR-004** (Database Schema) for the Service-to-Model interaction.
