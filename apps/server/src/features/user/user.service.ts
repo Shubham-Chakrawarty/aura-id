@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma.js';
+import { prisma } from '@aura/database';
 
 export const findUserByEmail = async (email: string) => {
   return await prisma.user.findUnique({

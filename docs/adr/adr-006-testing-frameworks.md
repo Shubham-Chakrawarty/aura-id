@@ -1,4 +1,4 @@
-# ADR 006: Selection of Vitest and Supertest for Integration Testing
+# ADR 006: Testing Frameworks
 
 - **Status:** `Accepted`
 - **Date:** 2026-01-11
@@ -51,4 +51,3 @@ We will implement an **Integration-First Testing Strategy** using **Vitest** and
 ### 5. Notes / Artifacts
 
 - **Reference:** This ADR fulfills the verification requirements for **ADR-005** (Backend Standards).
-- **File Location:** `apps/server/vitest.config.ts`.

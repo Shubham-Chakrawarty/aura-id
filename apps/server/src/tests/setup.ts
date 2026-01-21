@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma.js';
+import { prisma } from '@aura/database';
 import { execSync } from 'child_process';
 import { afterAll, beforeAll } from 'vitest';
 

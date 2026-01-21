@@ -1,3 +1,40 @@
+**[2026-01-21] Ref:** Issue #16 | ADR-003
+
+### Technical Hurdles & Resolutions
+
+- **Problem:** Ensuring the Prisma Client is always up-to-date without manual intervention and deciding between `src` and `dist` exports for the internal package.
+- **Resolution:**
+  - 1.  **Dist-First Exports:** Switched from `src` to `dist` exports in `package.json`. This treats the database package as a compiled library, improving performance by avoiding on-the-fly transpilation and ensuring architectural boundaries are respected.
+  - 2.  **Lifecycle Automation (`pre` scripts):** Implemented `predev` and `prebuild` hooks. By mapping these to `pnpm db:generate`, we ensure the Prisma Client is automatically re-generated whenever the development server starts or a production build is triggered. This eliminates "out-of-sync" type errors.
+  - 3.  **Singleton Pattern Implementation:** Refactored the client initialization to use the `global` object.
+  - **Why:** In Node.js environments with Hot Module Replacement (HMR), re-instantiating `PrismaClient` on every file save would exhaust the Postgres connection pool.
+  - **Impact:** The singleton pattern ensures only one connection pool exists across the entire application lifecycle, preventing "Too many connections" errors during development.
+
+  ***
+  - **Problem:** Deciding whether to persist user data before or after email verification.
+  - **Resolution:** Adopted a **"Persist-First"** strategy. Users are saved to the `users` table immediately with `isEmailVerified: false`. This ensures data integrity (Unique email constraints), enables "re-engagement" marketing, and simplifies the codebase by using the primary database as the single source of truth for all identity states.
+
+  ***
+  - **Problem:** Attempted to use the multi-schema models instead of all models in one big file, but encountered pathing issues and "Cannot find modules” errors during execution and monorepo building. The multi-file schema was not correctly merging or being detected by the generator.
+  - **Resolution:** Fixed the configs and folder names according to Prisma v7 architecture.
+    1. Renamed the directory from `schema/` to `models/` (Keeping logic organised but not as the primary source).
+    2. Updated `packages/database/package.json` to point to the directory: `"prisma": { "schema": "./prisma" }`.
+    3. Updated `prisma.config.ts` to point to `./prisma` instead of `./prisma/schema.prisma`.
+
+---
+
+**[2026-01-20] Ref:** Issue #16 | ADR-003
+
+### Technical Hurdles & Resolutions
+
+- **Problem:** Prisma 7 + ESM Monorepo pathing issues. Specifically, the `MODULE_NOT_FOUND` error for `.prisma/client/default` and TypeScript's inability to see the generated client inside the `dist` folder.
+- **Resolution:** 1. **Standardized Output:** Configured `schema.prisma` to output to `../src/generated` to keep it within the TypeScript `rootDir`.
+
+2. **Barrel Export Pattern:** Split the database package into `lib/prisma.ts` (singleton logic), `utils/reset-db.ts` (helpers), and a central `index.ts` for clean public exports.
+3. **Watch Automation:** Added `tsc --watch` to the database package to automate the `src` -> `dist` compilation during development.
+
+---
+
 **[2026-01-18] Ref:** Issue #14 | ADR-007
 
 ### Technical Hurdles & Resolutions

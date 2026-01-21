@@ -1,0 +1,30 @@
+// 2. SECURITY BOUNDARY (The "Country")
+model Application {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+  logoUrl     String?
+
+  // OAuth/OIDC Credentials
+  clientId     String @unique @default(uuid())
+  clientSecret String // Reminder: Argon2 hash this in your service logic
+
+  // Security Configuration
+  appType        String   @default("WEB") // New: e.g., "SPA", "NATIVE", "WEB"
+  redirectUris   String[]
+  allowedOrigins String[] // New: For CORS management
+  homePageUrl    String?
+
+  // Status
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Relationships
+  sessions    Session[]
+  memberships ApplicationMembership[]
+  refreshTokens RefreshToken[]
+
+  @@map("applications")
+}

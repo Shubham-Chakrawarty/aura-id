@@ -1,0 +1,33 @@
+model RefreshToken {
+  id    String @id @default(cuid())
+  token String @unique @db.Text
+
+  // Foreign Keys
+  userId        String
+  applicationId String
+  sessionId     String
+
+  // Security: Token Rotation Chain
+  isRevoked  Boolean   @default(false)
+  revokedAt  DateTime?
+  replacedBy String?
+
+  // Metadata (Inherited from Session, but useful to snapshop here)
+  userAgent String? @db.Text
+  ipAddress String?
+
+  // Lifecycle
+  expiresAt   DateTime
+  createdAt   DateTime    @default(now())
+  deletedAt   DateTime?
+
+  // Relations
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  session     Session     @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@index([sessionId])
+  @@map("refresh_tokens")
+}

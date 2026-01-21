@@ -15,7 +15,9 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-
+    env:
+      # Defining it here makes it available to ALL steps below
+      DATABASE_URL: postgresql://aura_admin_test:aura_password_test@localhost:5435/aura_auth_db_test
     # needs: [set-up-environment]
     services:
       postgres:
@@ -51,9 +53,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Generate Prisma Client for the server app
-      - name: Generate Prisma Client
-        run: pnpm --filter @aura/server exec prisma generate
+      # 2. Compile the package to generate the /dist folder
+      - name: Build Database Package
+        run: pnpm --filter "./packages/**" build
 
       # Check Formatting (Prettier)
       - name: Format check
@@ -71,7 +73,6 @@ jobs:
       - name: Database Integration Tests
         run: pnpm test
         env:
-          DATABASE_URL: postgresql://aura_admin_test:aura_password_test@localhost:5435/aura_auth_db_test
           NODE_ENV: test
           JWT_ACCESS_SECRET: ${{ secrets.JWT_ACCESS_SECRET || 'github-actions-dummy-secret-access' }}
           JWT_REFRESH_SECRET: ${{ secrets.JWT_REFRESH_SECRET || 'github-actions-dummy-secret-refresh' }}

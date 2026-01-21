@@ -15,18 +15,18 @@ AuraID is designed to be a standalone Identity Provider (IdP) responsible for ce
 
 We will adopt a **Hybrid Integration Model** utilizing a modern TypeScript monorepo (`pnpm` workspaces) to maintain a single source of truth across all components.
 
-### **Architecture Components**
+**Architecture Components**
 
 - **Hosted Authentication Portal:** A centralized React/Vite application for secure, redirect-based login flows (SSO).
 - **Headless SDK:** A logic-only package (`packages/sdk`) for internal services to handle session verification and context maintenance without UI overhead.
 - **Server Core:** An Express.js API following a feature-based architecture.
 
-### **Core Infrastructure**
+**Core Infrastructure**
 
 - **Persistence:** **PostgreSQL** via **Prisma ORM**. All core entities (User, Application, Membership) must include mandatory **Soft Deletes** (`deletedAt`) to preserve audit trails.
 - **Cache & Security State:** **Redis** for real-time session tracking, token revocation lists (blacklisting), and fast security lookups.
 
-### **Security Primitives**
+**Security Primitives**
 
 - **Token Signing:** **RS256 (Asymmetric)** using the `jose` library. The IdP signs with a private key; apps verify with a public key.
 - **Hashing:** **Argon2id** for user passwords, providing memory-hard resistance against GPU/ASIC attacks.
@@ -38,7 +38,7 @@ We will adopt a **Hybrid Integration Model** utilizing a modern TypeScript monor
 - **RS256 vs HS256:** In a multi-app ecosystem, sharing a "secret key" (HS256) with every client app is a massive security risk. RS256 allows us to share only a **Public Key**, meaning even if a client app is compromised, the attacker cannot forge AuraID tokens.
 - **Argon2id:** We are choosing the winner of the Password Hashing Competition. It is more secure than Bcrypt or Scrypt against modern hardware-accelerated attacks.
 - **Redis for Session Scoping:** While JWTs are great for being stateless, they are hard to "cancel." By tracking sessions in Redis, we can implement **Scoped Logout** (killing a session for one app while keeping the user logged into others) and a "Global Kill Switch" for compromised accounts.
-- **Monorepo (pnpm + Shared Packages):** To follow the **DRY (Don't Repeat Yourself)** principle, we will use `packages/shared` for our Zod schemas. This ensures the Auth Portal, the Server, and the SDK all agree on the exact shape of a "User" or a "Login Request" at compile-time.
+- **Monorepo (pnpm + Shared Packages):** To follow the **DRY (Don't Repeat Yourself)** principle. This ensures the Auth Portal, the Server, and the SDK all agree on the exact shape of a "User" or a "Login Request" at compile-time.
 
 ### 4. Consequences
 

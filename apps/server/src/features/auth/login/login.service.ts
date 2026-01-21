@@ -1,8 +1,8 @@
 import { toSafeUser } from '@/features/user/user.mapper.js';
 import { findUserForApp } from '@/features/user/user.service.js';
 import { verifyPassword } from '@/lib/password.js';
-import { prisma } from '@/lib/prisma.js';
 import { AppError } from '@/utils/app-error.js';
+import { prisma } from '@aura/database';
 import { LoginRequest } from '@aura/shared/auth';
 import { createSession } from '../shared/session.service.js';
 import { generateAccessToken } from '../shared/token.service.js';

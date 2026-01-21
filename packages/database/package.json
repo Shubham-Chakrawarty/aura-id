@@ -1,0 +1,56 @@
+{
+  "name": "@aura/database",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "prisma"
+  ],
+  "prisma": {
+    "schema": "./prisma"
+  },
+  "scripts": {
+    "// --- Quality & Governance ---": "",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "lint:staged-fix": "eslint --fix",
+    "typecheck": "tsc --noEmit",
+    "// --- Database ---": "",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:push": "prisma db push",
+    "db:pull": "prisma db pull",
+    "db:reset": "prisma db reset",
+    "// --- Core Workflow ---": "",
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "predev": "npm run db:generate",
+    "prebuild": "npm run db:generate"
+  },
+  "devDependencies": {
+    "@aura/eslint-config": "workspace:*",
+    "@aura/typescript-config": "workspace:*",
+    "@types/node": "^22.19.5",
+    "@types/pg": "^8.16.0",
+    "dotenv-cli": "^11.0.0",
+    "prisma": "^7.2.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  },
+  "packageManager": "pnpm@10.25.0",
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.2.0",
+    "@prisma/client": "^7.2.0",
+    "dotenv": "^17.2.3",
+    "pg": "^8.17.1"
+  }
+}

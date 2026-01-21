@@ -1,0 +1,39 @@
+// The "SESSION PASSPORT" (The "KEYCARD")
+model Session {
+  id            String    @id @default(cuid())
+
+  // The "Triple-Link" Foreign Keys
+  userId        String
+  applicationId String
+  membershipId  String    // Added: Links to the specific "Visa" used
+
+  // OIDC standard session identifier
+  sid           String    @unique @default(cuid())
+
+  // Security Status
+  isActive      Boolean   @default(true)
+  isRevoked     Boolean   @default(false)
+  revokedAt     DateTime?
+
+  // Device context for the Security Dashboard
+  userAgent     String?   @db.Text
+  ipAddress     String?
+
+  // Lifecycle
+  lastActiveAt  DateTime  @default(now())
+  expiresAt     DateTime
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime? // Added: Consistent with Audit Standard
+
+  // Relations
+  user          User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  application   Application           @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  membership    ApplicationMembership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  refreshTokens RefreshToken[]
+
+  @@index([userId])
+  @@index([applicationId])
+  @@index([sid])
+  @@map("sessions")
+}
