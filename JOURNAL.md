@@ -1,4 +1,18 @@
-**[2026-01-20] Ref:** Issue #12 | ADR-003
+**[2026-01-21] Ref:** Issue #16 | ADR-003
+
+### Technical Hurdles & Resolutions
+
+- **Problem:** Ensuring the Prisma Client is always up-to-date without manual intervention and deciding between `src` and `dist` exports for the internal package.
+- **Resolution:**
+  - 1.  **Dist-First Exports:** Switched from `src` to `dist` exports in `package.json`. This treats the database package as a compiled library, improving performance by avoiding on-the-fly transpilation and ensuring architectural boundaries are respected.
+  - 2.  **Lifecycle Automation (`pre` scripts):** Implemented `predev` and `prebuild` hooks. By mapping these to `pnpm db:generate`, we ensure the Prisma Client is automatically re-generated whenever the development server starts or a production build is triggered. This eliminates "out-of-sync" type errors.
+  - 3.  **Singleton Pattern Implementation:** Refactored the client initialization to use the `global` object.
+  - **Why:** In Node.js environments with Hot Module Replacement (HMR), re-instantiating `PrismaClient` on every file save would exhaust the Postgres connection pool.
+  - **Impact:** The singleton pattern ensures only one connection pool exists across the entire application lifecycle, preventing "Too many connections" errors during development.
+
+---
+
+**[2026-01-20] Ref:** Issue #16 | ADR-003
 
 ### Technical Hurdles & Resolutions
 
