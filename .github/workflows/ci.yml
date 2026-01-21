@@ -53,7 +53,7 @@ jobs:
 
       # Generate Prisma Client for the database package
       - name: Generate Prisma Client
-        run: pnpm --filter @aura/database exec prisma generate
+        run: pnpm --filter @aura/database db:generate
 
       # Check Formatting (Prettier)
       - name: Format check
