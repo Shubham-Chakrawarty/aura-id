@@ -1,6 +1,6 @@
 import { toSafeUser } from '@/features/user/user.mapper.js';
 import { sendSuccess } from '@/utils/response.js';
-import { RegisterRequest } from '@aura/shared/auth';
+import { RegisterRequest } from '@aura/shared';
 import { NextFunction, Request, Response } from 'express';
 import { registerUser } from './register.service.js';
 

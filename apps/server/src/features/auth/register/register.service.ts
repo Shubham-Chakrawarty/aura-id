@@ -2,7 +2,7 @@ import { findUserByEmail } from '@/features/user/user.service.js';
 import { hashPassword } from '@/lib/password.js';
 import { AppError } from '@/utils/app-error.js';
 import { prisma } from '@aura/database';
-import { RegisterRequest } from '@aura/shared/auth';
+import { RegisterRequest } from '@aura/shared';
 
 export const registerUser = async (data: RegisterRequest) => {
   const existingUser = await findUserByEmail(data.email);

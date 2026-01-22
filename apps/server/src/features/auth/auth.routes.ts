@@ -1,5 +1,5 @@
 import { validateBody } from '@/middlewares/validateBody.middleware.js';
-import { loginRequestSchema, registerRequestSchema } from '@aura/shared/auth';
+import { loginRequestSchema, registerRequestSchema } from '@aura/shared';
 import { Router } from 'express';
 import { login } from './login/login.controller.js';
 import { register } from './register/register.controller.js';
