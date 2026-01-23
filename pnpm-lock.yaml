@@ -105,10 +105,16 @@ importers:
       pg:
         specifier: ^8.17.1
         version: 8.17.1
+      zod:
+        specifier: ^4.3.5
+        version: 4.3.5
     devDependencies:
       '@aura/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
+      '@aura/shared':
+        specifier: workspace:*
+        version: link:../shared
       '@aura/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
@@ -157,6 +163,9 @@ importers:
 
   packages/shared:
     dependencies:
+      argon2:
+        specifier: ^0.44.0
+        version: 0.44.0
       zod:
         specifier: ^4.3.5
         version: 4.3.5

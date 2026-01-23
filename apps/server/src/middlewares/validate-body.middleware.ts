@@ -1,5 +1,5 @@
 import { AppError } from '@/utils/app-error.js';
-import { formatZodError } from '@/utils/zod-format.js';
+import { formatZodError } from '@aura/shared';
 import { NextFunction, Request, Response } from 'express';
 import { ZodError, ZodType } from 'zod';
 

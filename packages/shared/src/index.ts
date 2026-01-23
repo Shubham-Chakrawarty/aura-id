@@ -5,3 +5,7 @@ export * from './features/auth/auth.types.js';
 export * from './features/user/user.types.js';
 // Primitive Schemas
 export * from './primitives/primitive.schema.js';
+// Utility Functions
+export * from './utils/env.utils.js';
+export * from './utils/hash.utils.js';
+export * from './utils/zod.utils.js';
