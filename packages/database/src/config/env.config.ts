@@ -1,5 +1,9 @@
 import { validateEnv } from '@aura/shared';
+import { config } from 'dotenv';
+import { resolve } from 'node:path';
 import { z } from 'zod';
+
+config({ path: resolve(import.meta.dirname, '../../.env') });
 
 const dbEnvSchema = z.object({
   NODE_ENV: z
@@ -19,4 +23,4 @@ const dbEnvSchema = z.object({
   ADMIN_PORTAL_SECRET: z.string().min(1, 'ADMIN_PORTAL_SECRET is required'),
 });
 
-export const env = validateEnv(dbEnvSchema);
+export const env = validateEnv(dbEnvSchema, process.env);
