@@ -1,3 +1,12 @@
+**[2026-01-23] Ref:** Issue #18
+
+### Technical Hurdles & Resolutions
+
+- **Problem:** `Environment Validation Failed` errors during startup. The `@aura/database` package was executing its Zod validation before `process.env` was populated, and it couldn't locate the root `.env` file from within the workspace.
+- **Resolution:** Explicitly configured `dotenv` using `import.meta.dirname` to resolve the absolute path to the root `.env`. Moved the configuration to the absolute top of the server entry point to prevent eager-loading validation crashes in internal packages.
+
+---
+
 **[2026-01-22] Ref:** Infrastructure | Tooling Strategy Note
 
 ### Technical Hurdles & Resolutions
