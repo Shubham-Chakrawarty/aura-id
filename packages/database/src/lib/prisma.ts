@@ -1,27 +1,14 @@
-import { PrismaPg } from '@prisma/adapter-pg';
-import pg from 'pg';
-import { PrismaClient } from '../generated/prisma/client.js';
-// 1. Connection Pool setup
-const pool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL,
-});
+import { env } from '../config/env.config.js';
+import { createPrismaClient } from './factory.js';
 
-// 2. Adapter setup
-const adapter = new PrismaPg(pool);
+// Use globalThis for maximum portability (Next.js, Deno, Cloudflare Workers, etc.)
+const globalForPrisma = globalThis as unknown as {
+  prismaInstance?: ReturnType<typeof createPrismaClient>;
+};
 
-// 3. Singleton logic for Monorepo/Dev environments
-const globalForPrisma = global as unknown as { prisma: PrismaClient };
-
-export const prisma =
-  globalForPrisma.prisma ||
-  new PrismaClient({
-    adapter,
-    log:
-      process.env.NODE_ENV === 'development'
-        ? ['query', 'error', 'warn']
-        : ['error'],
-  });
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
-
-export * from '../generated/prisma/client.js';
+export const { prisma, close } =
+  globalForPrisma.prismaInstance ??
+  (globalForPrisma.prismaInstance = createPrismaClient(
+    env.DATABASE_URL,
+    env.NODE_ENV === 'development',
+  ));

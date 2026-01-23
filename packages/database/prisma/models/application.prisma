@@ -6,8 +6,8 @@ model Application {
   logoUrl     String?
 
   // OAuth/OIDC Credentials
-  clientId     String @unique @default(uuid())
-  clientSecret String // Reminder: Argon2 hash this in your service logic
+  clientId     String @unique @default(uuid()) @map("client_id")
+  clientSecret String? // Reminder: Argon2 hash this in your service logic
 
   // Security Configuration
   appType        String   @default("WEB") // New: e.g., "SPA", "NATIVE", "WEB"
