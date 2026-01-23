@@ -3,7 +3,7 @@ import { formatZodError } from './zod.utils.js';
 
 export function validateEnv<T extends ZodType>(
   schema: T,
-  envSource: NodeJS.ProcessEnv = process.env,
+  envSource = process.env,
 ): z.infer<T> {
   const parsed = schema.safeParse(envSource);
 
