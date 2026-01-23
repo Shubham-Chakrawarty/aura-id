@@ -8,7 +8,7 @@ export function createPrismaClient(dbUrl: string, isDev: boolean) {
 
   const client = new PrismaClient({
     adapter,
-    log: isDev ? ['query', 'error', 'warn'] : ['error'],
+    log: isDev ? ['error', 'warn'] : ['error'],
   });
 
   return {

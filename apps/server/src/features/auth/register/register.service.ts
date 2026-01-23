@@ -23,7 +23,19 @@ export class RegisterService {
 
     try {
       const newUser = await prisma.$transaction(async (tx) => {
-        // 1. Create the Global Identity
+        // 1. Verify Application Exists
+        const application = await tx.application.findUnique({
+          where: { clientId: clientId },
+        });
+
+        if (!application) {
+          throw new AppError(
+            `Application with clientId "${clientId}" not found.`,
+            400,
+            'INVALID_APPLICATION',
+          );
+        }
+        // 2. Create the User
         const user = await tx.user.create({
           data: {
             email: email.toLowerCase(), // Always normalize emails!
@@ -35,11 +47,11 @@ export class RegisterService {
           },
         });
 
-        // 2. Create the Application-Specific "Visa" (Membership)
+        // 3. Create the Application-Specific "Visa" (Membership)
         await tx.applicationMembership.create({
           data: {
             userId: user.id,
-            applicationId: clientId,
+            applicationId: application.id,
             role: 'USER',
           },
         });
@@ -47,7 +59,7 @@ export class RegisterService {
         return user;
       });
 
-      // 3. Transform to SafeUser before leaving the Service layer
+      // 4. Transform to SafeUser before leaving the Service layer
       return {
         user: toSafeUser(newUser, clientId),
       };
