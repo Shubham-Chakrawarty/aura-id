@@ -1,14 +1,10 @@
-import { AppError } from '@/utils/app-error.js';
+import { AppError } from '@/utils/error.utils.js';
 import { formatZodError } from '@aura/shared';
-import { NextFunction, Request, Response } from 'express';
+import { NextFunction, Request, RequestHandler, Response } from 'express';
 import { ZodError, ZodType } from 'zod';
 
-export const validateBody = <T>(schema: ZodType<T>) => {
-  return async (
-    req: Request<Record<string, never>, unknown, T>,
-    res: Response,
-    next: NextFunction,
-  ) => {
+export const validateBody = <T>(schema: ZodType<T>): RequestHandler => {
+  return async (req: Request, _res: Response, next: NextFunction) => {
     try {
       const validatedBody = await schema.parseAsync(req.body);
       req.body = validatedBody;
@@ -19,9 +15,9 @@ export const validateBody = <T>(schema: ZodType<T>) => {
         return next(
           new AppError('Validation Failed', 400, 'VALIDATION_ERROR', details),
         );
-      } else {
-        next(error);
       }
+
+      next(error);
     }
   };
 };
