@@ -8,4 +8,5 @@ export * from './primitives/primitive.schema.js';
 // Utility Functions
 export * from './utils/env.utils.js';
 export * from './utils/hash.utils.js';
+export * from './utils/user.utils.js';
 export * from './utils/zod.utils.js';
