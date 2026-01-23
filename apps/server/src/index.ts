@@ -1,38 +1,38 @@
-import { prisma } from '@aura/database';
+import { disconnectDB, prisma } from '@aura/database';
+import { Server } from 'http';
 import { env } from './config/env.config.js';
 import { app } from './server.js';
 
+let server: Server;
+
+async function handleExit(signal: string, code: number = 0) {
+  console.log(`\n${signal} received. Cleaning up...`);
+
+  if (server) {
+    server.close();
+  }
+
+  await disconnectDB();
+  console.log('🛑 Connections closed. Goodbye!');
+  process.exit(code);
+}
+
 async function bootstrap() {
   try {
-    // 1. Initialize Prisma Connection
     await prisma.$connect();
-    console.log('✅ Database connected successfully');
+    console.log('✅ Database connected');
 
-    // 2. Start the Express Server
-    const server = app.listen(env.PORT, () => {
-      console.log(`🚀 Auth service running on: http://localhost:${env.PORT}`);
+    server = app.listen(env.PORT, () => {
+      console.log(`🚀 Auth service: http://localhost:${env.PORT}`);
     });
-
-    // 3. Graceful Shutdown Logic
-    const shutdown = async (signal: string) => {
-      console.log(`${signal} received. Shutting down gracefully...`);
-
-      server.close(async () => {
-        // Close Prisma connection
-        await prisma.$disconnect();
-        console.log('🛑 Database disconnected');
-        process.exit(0);
-      });
-    };
-
-    // Listen for termination signals (Docker/Node stop)
-    process.on('SIGTERM', () => shutdown('SIGTERM'));
-    process.on('SIGINT', () => shutdown('SIGINT'));
   } catch (error) {
-    console.error('❌ Failed to start the service:', error);
-    await prisma.$disconnect();
-    process.exit(1);
+    console.error('❌ Startup failed:', error);
+    await handleExit('CRASH', 1);
   }
 }
+
+// Global listeners for clean exit
+process.on('SIGTERM', () => handleExit('SIGTERM'));
+process.on('SIGINT', () => handleExit('SIGINT'));
 
 bootstrap();

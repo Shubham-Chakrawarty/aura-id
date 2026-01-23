@@ -1,9 +1,7 @@
-import { toSafeUser } from '@/features/user/user.mapper.js';
 import { findUserForApp } from '@/features/user/user.service.js';
-import { verifyPassword } from '@/lib/password.js';
-import { AppError } from '@/utils/app-error.js';
-import { prisma } from '@aura/database';
-import { LoginRequest } from '@aura/shared/auth';
+import { AppError } from '@/utils/error.utils.js';
+import { prisma, toSafeUser } from '@aura/database';
+import { LoginRequest, verifyHash } from '@aura/shared';
 import { createSession } from '../shared/session.service.js';
 import { generateAccessToken } from '../shared/token.service.js';
 
@@ -54,7 +52,7 @@ const verifyCredentials = async (
   const { user, isRegisteredForApp } = response;
 
   // 2. Verify Password
-  const isPasswordValid = await verifyPassword(user.passwordHash, password);
+  const isPasswordValid = await verifyHash(user.passwordHash, password);
 
   // 3. Check both password AND if they belong to this app
   if (!isPasswordValid || !isRegisteredForApp) {

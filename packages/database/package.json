@@ -15,9 +15,6 @@
     "dist",
     "prisma"
   ],
-  "prisma": {
-    "schema": "./prisma"
-  },
   "scripts": {
     "// --- Quality & Governance ---": "",
     "lint": "eslint .",
@@ -30,6 +27,7 @@
     "db:push": "prisma db push",
     "db:pull": "prisma db pull",
     "db:reset": "prisma db reset",
+    "db:seed": "prisma db seed",
     "// --- Core Workflow ---": "",
     "build": "tsc",
     "dev": "tsc --watch",
@@ -39,6 +37,7 @@
   "devDependencies": {
     "@aura/eslint-config": "workspace:*",
     "@aura/typescript-config": "workspace:*",
+    "@aura/shared": "workspace:*",
     "@types/node": "^22.19.5",
     "@types/pg": "^8.16.0",
     "dotenv-cli": "^11.0.0",
@@ -51,6 +50,7 @@
     "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^7.2.0",
     "dotenv": "^17.2.3",
-    "pg": "^8.17.1"
+    "pg": "^8.17.1",
+    "zod": "^4.3.5"
   }
 }

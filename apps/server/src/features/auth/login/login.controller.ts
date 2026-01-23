@@ -1,6 +1,6 @@
 import { env } from '@/config/env.config.js';
-import { sendSuccess } from '@/utils/response.js';
-import { LoginRequest } from '@aura/shared/auth';
+import { sendSuccess } from '@/utils/response.utils.js';
+import { LoginRequest } from '@aura/shared';
 import { NextFunction, Request, Response } from 'express';
 import { loginUser } from './login.service.js';
 

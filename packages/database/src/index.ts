@@ -1,3 +1,4 @@
 export * from './generated/prisma/client.js';
-export { prisma } from './lib/prisma.js';
-export { resetDb } from './utils/reset-db.js';
+export * from './lib/prisma.js';
+export * from './mapper/user.mapper.js';
+export * from './utils/db.utils.js';

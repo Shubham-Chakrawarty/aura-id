@@ -1,3 +1,28 @@
+**[2026-01-23] Ref:** Issue #18
+
+### Technical Hurdles & Resolutions
+
+- **Problem:** `Environment Validation Failed` errors during startup. The `@aura/database` package was executing its Zod validation before `process.env` was populated, and it couldn't locate the root `.env` file from within the workspace.
+- **Resolution:** Explicitly configured `dotenv` using `import.meta.dirname` to resolve the absolute path to the root `.env`. Moved the configuration to the absolute top of the server entry point to prevent eager-loading validation crashes in internal packages.
+
+---
+
+**[2026-01-22] Ref:** Infrastructure | Tooling Strategy Note
+
+### Technical Hurdles & Resolutions
+
+- **Problem:** Deciding whether to standardize on `tsup` for all monorepo packages or keep `tsc` for specific layers. The friction point was determining if `tsup`'s bundling would interfere with Prisma's internal mechanics.
+- **Resolution:** Implemented a **Hybrid Build Strategy** based on the "Nature of the Package":
+  1. **Shared Logic (`@aura/shared`):** Adopted **`tsup`**. Since this package contains pure TypeScript logic (Zod schemas, constants), `tsup` provides superior DX through faster builds (esbuild), automatic `dist/` cleaning, and clean ESM bundling.
+  2. **Database Infrastructure (`@aura/database`):** Retained **`tsc`**. Prisma 6 relies on specific relative pathing to locate its Rust Query Engine binary. Bundling this layer with `tsup` risks "snapping" the links between the JavaScript wrapper and the binary engine. `tsc` preserves the file structure exactly as Prisma generates it, ensuring production stability.
+- **Key Takeaway:** Standardization is good, but **Stability > Consistency** for infrastructure. If a package manages a binary engine or complex dynamic imports, avoid bundling.
+  ***
+- **Problem:** Balancing clean import paths in `apps/server` with the internal structure of `packages/shared`. Direct file imports were becoming verbose and brittle.
+- **Resolution:** Implemented a **Barrel Export (Index) Strategy** for the `@aura/shared` package. By aggregating all features (Auth, User, Primitives) into a central `src/index.ts`, we enabled clean, high-level imports (e.g., `import { registerSchema } from '@aura/shared'`).
+- **Constraint Note:** This strategy is chosen for the current scale of the project. We will monitor for circular dependencies and may move to explicit subpath exports if the shared logic grows significantly.
+
+---
+
 **[2026-01-21] Ref:** Issue #16 | ADR-003
 
 ### Technical Hurdles & Resolutions

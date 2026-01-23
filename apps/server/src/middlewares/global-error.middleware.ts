@@ -7,27 +7,35 @@ export const globalErrorHandler = (
   res: Response,
   _next: NextFunction,
 ) => {
-  let statusCode = err.statusCode || 500;
-  let message = err.message || 'Internal Server Error';
-  let code = err.code || 'INTERNAL_ERROR';
+  const statusCode = err.statusCode || 500;
+  const isCritical = statusCode === 500;
 
-  if (statusCode === 500) {
-    console.error('❌ CRITICAL ERROR:', err);
-    message = 'Something went wrong on our end';
+  if (isCritical) {
+    console.error('❌ [CRITICAL]:', {
+      name: err.name,
+      message: err.message,
+      body: req.body,
+      path: req.originalUrl,
+      stack: err.stack,
+    });
+
+    if (env.NODE_ENV === 'production') {
+      err.message = 'Something went wrong on our end';
+    }
   }
 
   res.status(statusCode).json({
     success: false,
-    message,
+    message: err.message,
     error: {
-      code,
+      code: err.code || (isCritical ? 'INTERNAL_ERROR' : 'BAD_REQUEST'),
       details: err.details || null,
-      // Only show stack trace in development mode!
       stack: env.NODE_ENV === 'development' ? err.stack : undefined,
     },
     meta: {
       timestamp: new Date().toISOString(),
-      path: req.originalUrl, // Useful for the frontend to know which URL failed
+      path: req.originalUrl,
+      requestId: req.headers['x-request-id'] || undefined,
     },
   });
 };
