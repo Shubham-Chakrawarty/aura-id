@@ -13,7 +13,7 @@ export function createPrismaClient(dbUrl: string, isDev: boolean) {
 
   return {
     prisma: client,
-    close: async () => {
+    disconnectDB: async () => {
       await client.$disconnect();
       await pool.end();
     },

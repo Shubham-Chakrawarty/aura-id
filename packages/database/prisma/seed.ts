@@ -3,7 +3,7 @@ import { env } from '../src/config/env.config.js';
 import { ApplicationCreateInput } from '../src/generated/prisma/models.js';
 import { createPrismaClient } from '../src/lib/factory.js';
 
-const { prisma, close } = createPrismaClient(env.DATABASE_URL, true);
+const { prisma, disconnectDB } = createPrismaClient(env.DATABASE_URL, true);
 
 async function main() {
   console.log('🌱 Seeding Professional AuraID Infrastructure...');
@@ -39,11 +39,11 @@ async function main() {
 main()
   .then(async () => {
     console.log('✅ Infrastructure Seeded Successfully.');
-    await close();
+    await disconnectDB();
     process.exit(0);
   })
   .catch(async (e) => {
     console.error('❌ Seed failed:', e);
-    await close();
+    await disconnectDB();
     process.exit(1);
   });

@@ -6,7 +6,7 @@ const globalForPrisma = globalThis as unknown as {
   prismaInstance?: ReturnType<typeof createPrismaClient>;
 };
 
-export const { prisma, close } =
+export const { prisma, disconnectDB } =
   globalForPrisma.prismaInstance ??
   (globalForPrisma.prismaInstance = createPrismaClient(
     env.DATABASE_URL,
