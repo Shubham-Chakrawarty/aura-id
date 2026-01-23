@@ -1,8 +1,8 @@
-import { type User } from '@aura/database';
-import { SafeUser } from '@aura/shared';
+import { getFallbackAvatar, type SafeUser } from '@aura/shared';
+import { User } from '../generated/prisma/client.js';
 
 export const toSafeUser = (user: User, clientId: string): SafeUser => {
-  const metadata = user.metadata as Record<string, unknown>;
+  const metadata = (user.metadata as Record<string, unknown>) || {};
 
   return {
     id: user.id,
@@ -11,8 +11,7 @@ export const toSafeUser = (user: User, clientId: string): SafeUser => {
     lastName: user.lastName,
     isEmailVerified: user.isEmailVerified,
     avatarUrl:
-      user.avatarUrl ??
-      `https://ui-avatars.com/api/?name=${user.firstName}+${user.lastName}&background=random`,
+      user.avatarUrl ?? getFallbackAvatar(user.firstName, user.lastName),
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
     appSettings: metadata[clientId] || {},
