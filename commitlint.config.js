@@ -1,8 +1,9 @@
 export default {
   extends: ['@commitlint/config-conventional'],
   rules: {
-    // You can customize rules here.
-    // Example: enforcing scopes like 'server', 'auth-portal', 'shared'
+    // Allowed format: type(scope): subject
+    // Allowed types [build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test]
+    // Allowed scopes
     'scope-enum': [
       2,
       'always',
