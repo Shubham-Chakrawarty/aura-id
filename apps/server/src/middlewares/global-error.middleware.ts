@@ -1,4 +1,5 @@
 import { env } from '@/config/env.config.js';
+import { ErrorApiResponse } from '@aura/shared';
 import { NextFunction, Request, Response } from 'express';
 
 export const globalErrorHandler = (
@@ -24,7 +25,7 @@ export const globalErrorHandler = (
     }
   }
 
-  res.status(statusCode).json({
+  const errorResponse: ErrorApiResponse = {
     success: false,
     message: err.message,
     error: {
@@ -37,5 +38,7 @@ export const globalErrorHandler = (
       path: req.originalUrl,
       requestId: req.headers['x-request-id'] || undefined,
     },
-  });
+  };
+
+  return res.status(statusCode).json(errorResponse);
 };

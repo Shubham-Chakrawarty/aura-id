@@ -1,61 +1,46 @@
-import { authConfig } from '@/config/auth.config.js';
-import { prisma } from '@aura/database';
 import crypto from 'node:crypto';
-import { generateRefreshToken } from './token.service.js';
+import { createSessionWithToken } from './session.repository.js';
 
-export const createSession = async (
-  userId: string,
-  applicationId: string,
-  userAgent: string,
-  ipAddress: string,
-) => {
-  // 1. Find the "Visa" (Membership) for this specific App
-  const membership = await prisma.applicationMembership.findUnique({
-    where: {
-      userId_applicationId: { userId, applicationId },
-    },
-  });
+type CreateSessionParams = {
+  userId: string;
+  applicationId: string;
+  membershipId: string;
+  context: { userAgent: string; ip: string };
+};
 
-  if (!membership) {
-    throw new Error('User does not have a membership for this application.');
-  }
+export class SessionService {
+  async create(params: CreateSessionParams) {
+    // 1. Destructure params to make the code cleaner
+    const { userId, applicationId, membershipId, context } = params;
 
-  const tokenString = await generateRefreshToken(userId, applicationId);
-  const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + authConfig.refreshTokenExpiresInDays);
+    // 2. Business Logic: Generate the identifiers
+    const sid = `sid_${crypto.randomBytes(16).toString('hex')}`;
+    const tokenString = crypto.randomBytes(40).toString('hex');
 
-  // 2. Execute the Atomic Transaction
-  return await prisma.$transaction(async (tx) => {
-    // Create the 'Keycard' (Session)
-    const session = await tx.session.create({
-      data: {
-        sid: `sid_${crypto.randomBytes(16).toString('hex')}`,
-        userId,
-        applicationId,
-        membershipId: membership.id, // Linked for the Quadruple Check
-        userAgent,
-        ipAddress,
-        expiresAt, // Session also needs an expiry (usually matches Refresh Token)
-      },
+    // 3. Set Expiry (7 Days)
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
+
+    // 4. Data Access: Delegate to Repo
+    // Fixed: Used correct object property mapping
+    const { session, refreshToken } = await createSessionWithToken({
+      userId,
+      applicationId,
+      membershipId,
+      sid,
+      tokenString,
+      userAgent: context.userAgent,
+      ipAddress: context.ip,
+      expiresAt,
     });
 
-    // Create the 'Battery' (RefreshToken)
-    const refreshToken = await tx.refreshToken.create({
-      data: {
-        token: tokenString,
-        userId,
-        applicationId,
-        sessionId: session.id,
-        expiresAt,
-        userAgent,
-        ipAddress,
-      },
-    });
-
+    // 5. Return only what the caller needs
     return {
       sid: session.sid,
       refreshToken: refreshToken.token,
-      expiresAt,
+      expiresAt: session.expiresAt,
     };
-  });
-};
+  }
+}
+
+export const sessionService = new SessionService();

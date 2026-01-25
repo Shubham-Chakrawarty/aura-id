@@ -1,34 +1,38 @@
-// 1. GLOBAL IDENTITY (The "Passport")
+// CORE IDENTITY: The "Passport"
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  PENDING_VERIFICATION
+  SUSPENDED
+}
+
 model User {
-  // 1. Core Identity
   id           String  @id @default(cuid())
   email        String  @unique
-  passwordHash String
-  firstName    String
-  lastName     String
-  avatarUrl    String?
+  passwordHash String  @map("password_hash")
+  firstName    String  @map("first_name")
+  lastName     String  @map("last_name")
+  avatarUrl    String? @map("avatar_url")
 
-  // 2. Account Status & Security
-  isActive        Boolean   @default(true)
-  isEmailVerified Boolean   @default(false)
-  blockedUntil    DateTime? // Protects against brute-force
-  lastLoginAt     DateTime?
+  // Status & Security
+  status          UserStatus @default(PENDING_VERIFICATION)
+  isEmailVerified Boolean    @default(false) @map("is_email_verified")
+  blockedUntil    DateTime?  @map("blocked_until")
+  lastLoginAt     DateTime?  @map("last_login_at")
 
-  // 3. Extensibility (The "Senior" Future-Proofing)
-  // Store things like "theme: dark" or "marketing_opt_in: true" here
+  // Extensibility
   metadata Json @default("{}")
 
-  // 4. Audit & Lifecycle
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
+  // Lifecycle
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 
-  // 5. Relationships
+  // Relations
   sessions           Session[]
   refreshTokens      RefreshToken[]
   memberships        ApplicationMembership[]
   verificationTokens VerificationToken[]
 
-  @@index([email])
   @@map("users")
 }

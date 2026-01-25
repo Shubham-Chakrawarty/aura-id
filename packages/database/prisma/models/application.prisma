@@ -1,29 +1,39 @@
-// 2. SECURITY BOUNDARY (The "Country")
+// SECURITY BOUNDARY: The "Country"
+
+enum ApplicationStatus {
+  ACTIVE
+  SUSPENDED
+  DEVELOPMENT
+}
+
 model Application {
   id          String  @id @default(cuid())
   name        String
   description String?
-  logoUrl     String?
+  logoUrl     String? @map("logo_url")
 
   // OAuth/OIDC Credentials
-  clientId     String @unique @default(uuid()) @map("client_id")
-  clientSecret String? // Reminder: Argon2 hash this in your service logic
+  clientId     String  @unique @default(uuid()) @map("client_id")
+  clientSecret String? @map("client_secret") // Store as Argon2 hash
 
   // Security Configuration
-  appType        String   @default("WEB") // New: e.g., "SPA", "NATIVE", "WEB"
-  redirectUris   String[]
-  allowedOrigins String[] // New: For CORS management
-  homePageUrl    String?
+  appType        String   @default("WEB") @map("app_type") // SPA, NATIVE, WEB, M2M
+  redirectUris   String[] @map("redirect_uris")
+  allowedOrigins String[] @map("allowed_origins")
+  postLogoutUris String[] @map("post_logout_uris")
+  homePageUrl    String?  @map("home_page_url")
 
   // Status
-  isActive  Boolean   @default(true)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
+  status ApplicationStatus @default(DEVELOPMENT)
 
-  // Relationships
-  sessions    Session[]
-  memberships ApplicationMembership[]
+  // Lifecycle
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  // Relations
+  sessions      Session[]
+  memberships   ApplicationMembership[]
   refreshTokens RefreshToken[]
 
   @@map("applications")

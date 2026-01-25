@@ -3,7 +3,7 @@ import {
   loginRequestSchema,
   registerFormSchema,
   registerRequestSchema,
-} from './auth.schema.js';
+} from '../schemas/auth.schema.js';
 
 export type LoginRequest = z.infer<typeof loginRequestSchema>;
 

@@ -112,9 +112,6 @@ importers:
       '@aura/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
-      '@aura/shared':
-        specifier: workspace:*
-        version: link:../shared
       '@aura/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config

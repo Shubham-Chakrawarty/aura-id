@@ -1,12 +1,12 @@
-// Auth Types and Schemas
-export * from './features/auth/auth.schema.js';
-export * from './features/auth/auth.types.js';
-// User Types
-export * from './features/user/user.types.js';
-// Primitive Schemas
-export * from './primitives/primitive.schema.js';
+// Schemas
+export * from './schemas/auth.schema.js';
+export * from './schemas/primitive.schema.js';
+// Types
+export * from './types/api.types.js';
+export * from './types/auth.types.js';
+export * from './types/user.types.js';
 // Utility Functions
+export * from './utils/avatar.utils.js';
 export * from './utils/env.utils.js';
 export * from './utils/hash.utils.js';
-export * from './utils/user.utils.js';
 export * from './utils/zod.utils.js';

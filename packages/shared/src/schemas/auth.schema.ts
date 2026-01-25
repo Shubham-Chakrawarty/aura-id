@@ -5,13 +5,14 @@ import {
   passwordSchema,
   strongPasswordSchema,
   urlSchema,
-} from '../../primitives/primitive.schema.js';
+} from './primitive.schema.js';
 
 export const loginRequestSchema = z.object({
   email: emailSchema,
   password: passwordSchema,
   // Security Boundary (The "Visa" application)
   clientId: z.string().min(1, 'Client ID is required'),
+  scopes: z.array(z.string()).default(['openid', 'profile']),
 });
 
 export const registerRequestSchema = z.object({
