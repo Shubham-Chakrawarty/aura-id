@@ -1,5 +1,6 @@
+import { getFallbackAvatar } from '@/utils/avatar.utils.js';
 import { ApplicationMembership, User } from '@aura/database';
-import { getFallbackAvatar, SafeUser, SafeUserWithContext } from '@aura/shared';
+import { SafeUser, SafeUserWithContext } from '@aura/shared';
 
 export function toSafeUser(
   user: User,
@@ -7,7 +8,6 @@ export function toSafeUser(
 ): SafeUser | SafeUserWithContext {
   const userMetaData = (user.metadata as Record<string, unknown>) || {};
 
-  // 1. Map the Global Identity
   const safeUser: SafeUser = {
     id: user.id,
     email: user.email,
@@ -21,10 +21,8 @@ export function toSafeUser(
     metadata: userMetaData,
   };
 
-  // 2. If no membership, return early (The Human only)
   if (!membership) return safeUser;
 
-  // 3. Attach Context (The Visa)
   return {
     ...safeUser,
     context: {

@@ -1,9 +1,14 @@
 import { AppError } from '@/utils/error.utils.js';
-import { findMembership } from './membership.repository.js';
+import { membershipRepository } from './membership.repository.js';
 
 export class MembershipService {
-  async checkAccess(userId: string, clientId: string) {
-    const membership = await findMembership(userId, clientId);
+  constructor(private readonly _membershipRepo: typeof membershipRepository) {}
+
+  checkAccess = async (userId: string, clientId: string) => {
+    const membership = await this._membershipRepo.findMembership(
+      userId,
+      clientId,
+    );
 
     // 1. Hand-off: User exists but has no "Visa" yet
     if (!membership) return null;
@@ -22,7 +27,7 @@ export class MembershipService {
       membership,
       application: membership.application,
     };
-  }
+  };
 }
 
-export const membershipService = new MembershipService();
+export const membershipService = new MembershipService(membershipRepository);

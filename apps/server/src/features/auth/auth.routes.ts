@@ -1,5 +1,5 @@
 import { validateBody } from '@/middlewares/validate-body.middleware.js';
-import { registerRequestSchema } from '@aura/shared';
+import { loginRequestSchema, registerRequestSchema } from '@aura/shared';
 import { Router } from 'express';
 import { authController } from './auth.controller.js';
 
@@ -10,4 +10,8 @@ authRouter.post(
   validateBody(registerRequestSchema),
   authController.register,
 );
-// authRouter.post('/login', validateBody(loginRequestSchema), login);
+authRouter.post(
+  '/login',
+  validateBody(loginRequestSchema),
+  authController.login,
+);

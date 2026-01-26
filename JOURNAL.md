@@ -1,3 +1,27 @@
+**[2026-01-26] Ref:** Issue #11
+
+### Technical Hurdles & Resolutions
+
+- **Problem:** Ambiguity between Global Identity (User) and Local Context (Membership) in API responses.
+- **Resolution:** Refactored `toSafeUser` mapper to support overloads. If a membership is provided, it returns a `SafeUserWithContext` containing both the `clientId` and a `context.id` (the Membership UUID/Visa).
+  ***
+- **Problem:** Hard-coupled services were making Unit Testing difficult and creating risks of circular dependencies.
+- **Resolution:** Implemented **Constructor Injection** across all Services and Controllers. Used the `private readonly _dependency` naming convention to clearly distinguish between injected tools and local method data.
+  ***
+- **Problem:** Bloated constructors due to over-injecting small utility functions.
+- **Resolution:** Established a "DI Boundary." Stateful objects (Services/Repos/Configs) are **Injected**, while stateless pure functions (Mappers/Crypto/Date Utils) are **Imported** directly to keep constructors clean and maintainable.
+  ***
+- **Problem:** Shared environment validation created potential circular dependency risks and obscured the exact file origin of validation errors.
+- **Resolution:** Reverted to **Pure Zod `.parse()`** within individual service and package configurations. This allows the Node.js process to "Fail-Fast" and crash immediately during the import phase if the environment is invalid, providing a clear stack trace to the offending config file.
+  ***
+- **Problem:** Inconsistent error formatting between the Database package and the Express Server.
+- **Resolution:** Standardized on raw Zod error output for "Top-Level" configuration. Removed the custom `validateEnv` wrapper to keep the `shared` package lean and focused on data types rather than process-level logic.
+  ***
+- **Problem:** Ambiguity in `.env` file location within the Monorepo/Microservice structure.
+- **Resolution:** Established a **Hybrid Env Strategy**. Services look for a local `.env` first (Service-specific) and then a root-level `.env` (Global Infra). Used `path: resolve(import.meta.dirname, ...)` to ensure paths are calculated relative to the file, not the current working directory.
+
+---
+
 **[2026-01-23] Ref:** Issue #18
 
 ### Technical Hurdles & Resolutions

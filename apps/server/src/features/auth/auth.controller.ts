@@ -1,3 +1,4 @@
+// apps/server/src/features/auth/auth.controller.ts
 import { env } from '@/config/env.config.js';
 import { sendSuccess } from '@/utils/response.utils.js';
 import { LoginRequest, RegisterRequest } from '@aura/shared';
@@ -6,6 +7,11 @@ import { loginService } from './login.service.js';
 import { registerService } from './register.service.js';
 
 export class AuthController {
+  constructor(
+    private readonly _loginService: typeof loginService,
+    private readonly _registerService: typeof registerService,
+  ) {}
+
   // POST /auth/register
   register = async (
     req: Request<Record<string, never>, unknown, RegisterRequest>,
@@ -13,10 +19,12 @@ export class AuthController {
     next: NextFunction,
   ) => {
     try {
-      const result = await registerService.execute(req.body);
+      // Named 'registration' to clarify this is the result of the process
+      const registration = await this._registerService.execute(req.body);
+
       return sendSuccess(res, {
-        message: 'Registration successful. Please verify your email.',
-        data: result.user,
+        message: 'Account created. Please verify your email to continue.',
+        data: { user: registration.user },
         statusCode: 201,
       });
     } catch (err) {
@@ -31,35 +39,42 @@ export class AuthController {
     next: NextFunction,
   ) => {
     try {
-      const { status, data } = await loginService.execute(req.body, {
-        ip: req.ip || 'unknown',
-        userAgent: req.headers['user-agent'] || 'unknown',
+      // Get connection metadata
+      const clientIp = req.ip || 'unknown';
+      const userAgent = req.headers['user-agent'] || 'unknown';
+
+      const authResult = await this._loginService.execute(req.body, {
+        ip: clientIp,
+        userAgent,
       });
 
-      // Return Consent Requirement Response
-      if (status === 'CONSENT_REQUIRED') {
+      // 1. Handle Consent Flow (Multi-Context Blueprint)
+      if (authResult.status === 'CONSENT_REQUIRED') {
         return sendSuccess(res, {
-          message: 'User authenticated, but app consent is missing.',
-          data: {
-            userId: data.userId,
-            clientId: data.clientId,
-            requestedScopes: data.requestedScopes,
-          },
+          message:
+            'Authentication successful. Consent required for this application.',
+          data: authResult.data, // Contains userId, clientId, requestedScopes
         });
       }
 
-      // Set HttpOnly Cookie for Refresh Token
-      res.cookie('refreshToken', data.refreshToken, {
+      // 2. Handle Success Flow
+      const { user, accessToken, refreshToken, expiresAt } = authResult.data;
+
+      // Set Security Cookie
+      res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
         secure: env.NODE_ENV === 'production',
         sameSite: 'lax',
-        expires: data.expiresAt,
+        expires: expiresAt,
+        path: '/auth/refresh', // Senior Tip: Restrict cookie sent path for better security
       });
 
-      // Return Access Token and User Info
       return sendSuccess(res, {
         message: 'Login successful',
-        data: { user: data.user, accessToken: data.accessToken },
+        data: {
+          user, // The SafeUser (with context)
+          accessToken, // The short-lived JWT
+        },
       });
     } catch (err) {
       next(err);
@@ -67,4 +82,4 @@ export class AuthController {
   };
 }
 
-export const authController = new AuthController();
+export const authController = new AuthController(loginService, registerService);

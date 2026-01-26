@@ -3,12 +3,11 @@ import { resolve } from 'node:path';
 import { z } from 'zod';
 
 config({ path: resolve(import.meta.dirname, '../../.env') });
+config({ path: resolve(import.meta.dirname, '../../../../.env') });
 
-export const envSchema = z.object({
+export const dbEnvSchema = z.object({
   // Environment
-  NODE_ENV: z
-    .enum(['development', 'production', 'test'])
-    .default('development'),
+  NODE_ENV: z.enum(['development', 'production', 'test']),
 
   // Database (Infrastructure)
   DATABASE_URL: z
@@ -37,4 +36,4 @@ export const envSchema = z.object({
     .min(12, 'Initial admin password must be at least 12 characters'),
 });
 
-export const env = envSchema.parse(process.env);
+export const env = dbEnvSchema.parse(process.env);

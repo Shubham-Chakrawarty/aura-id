@@ -8,10 +8,8 @@ export async function dbOperation<T>(operation: () => Promise<T>): Promise<T> {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       switch (error.code) {
         case 'P2002': // Unique constraint failed
-          const target =
-            (error.meta?.target as string[])?.join(', ') || 'field';
           throw new AppError(
-            `A record with this ${target} already exists.`,
+            `A record with this data already exists.`,
             409,
             'CONFLICT_ERROR',
           );

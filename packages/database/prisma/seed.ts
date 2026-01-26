@@ -1,7 +1,7 @@
-import { getFallbackAvatar, hashString } from '@aura/shared';
 import { env } from '../src/config/env.config.js';
 import { Prisma } from '../src/generated/prisma/client.js';
 import { createPrismaClient } from '../src/lib/factory.js';
+import { hashString } from '../src/utils/hash.utils.js';
 
 const { prisma, disconnectDB } = createPrismaClient(env.DATABASE_URL, true);
 
@@ -57,7 +57,6 @@ async function main() {
       lastName: 'Chakrawarty',
       status: 'ACTIVE',
       isEmailVerified: true,
-      avatarUrl: getFallbackAvatar('Shubham', 'Chakrawarty'),
     },
   });
 

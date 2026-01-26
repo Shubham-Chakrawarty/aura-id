@@ -1,12 +1,15 @@
 import { AppError } from '@/utils/error.utils.js';
-import { hashString, RegisterRequest } from '@aura/shared';
+import { hashString } from '@aura/database';
+import { RegisterRequest } from '@aura/shared';
 import { toSafeUser } from '../user/user.mapper.js';
-import { createIdentityWithMembership } from './auth.repository.js';
+import { userRepository } from '../user/user.repository.js';
 
 export class RegisterService {
-  async execute(data: RegisterRequest) {
+  constructor(private readonly _userRepo: typeof userRepository) {}
+
+  execute = async (data: RegisterRequest) => {
     const passwordHash = await hashString(data.password);
-    const result = await createIdentityWithMembership({
+    const reponse = await this._userRepo.createWithMembership({
       email: data.email,
       passwordHash,
       firstName: data.firstName,
@@ -16,11 +19,11 @@ export class RegisterService {
       role: 'USER',
     });
 
-    if (!result)
+    if (!reponse)
       throw new AppError('Application not found', 400, 'APPLICATION_NOT_FOUND');
 
-    return { user: toSafeUser(result.user, result.membership) };
-  }
+    return { user: toSafeUser(reponse.user, reponse.membership) };
+  };
 }
 
-export const registerService = new RegisterService();
+export const registerService = new RegisterService(userRepository);

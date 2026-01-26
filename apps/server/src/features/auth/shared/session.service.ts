@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import { createSessionWithToken } from './session.repository.js';
+import { sessionRepository } from './session.repository.js';
 
 type CreateSessionParams = {
   userId: string;
@@ -9,21 +9,18 @@ type CreateSessionParams = {
 };
 
 export class SessionService {
-  async create(params: CreateSessionParams) {
-    // 1. Destructure params to make the code cleaner
+  constructor(private readonly _sessionRepo: typeof sessionRepository) {}
+
+  create = async (params: CreateSessionParams) => {
     const { userId, applicationId, membershipId, context } = params;
 
-    // 2. Business Logic: Generate the identifiers
     const sid = `sid_${crypto.randomBytes(16).toString('hex')}`;
     const tokenString = crypto.randomBytes(40).toString('hex');
 
-    // 3. Set Expiry (7 Days)
     const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7);
+    expiresAt.setDate(expiresAt.getDate() + 7); // 7 days
 
-    // 4. Data Access: Delegate to Repo
-    // Fixed: Used correct object property mapping
-    const { session, refreshToken } = await createSessionWithToken({
+    const { session, refreshToken } = await this._sessionRepo.createWithToken({
       userId,
       applicationId,
       membershipId,
@@ -34,13 +31,12 @@ export class SessionService {
       expiresAt,
     });
 
-    // 5. Return only what the caller needs
     return {
       sid: session.sid,
       refreshToken: refreshToken.token,
       expiresAt: session.expiresAt,
     };
-  }
+  };
 }
 
-export const sessionService = new SessionService();
+export const sessionService = new SessionService(sessionRepository);

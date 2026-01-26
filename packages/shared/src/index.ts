@@ -6,7 +6,4 @@ export * from './types/api.types.js';
 export * from './types/auth.types.js';
 export * from './types/user.types.js';
 // Utility Functions
-export * from './utils/avatar.utils.js';
-export * from './utils/env.utils.js';
-export * from './utils/hash.utils.js';
 export * from './utils/zod.utils.js';

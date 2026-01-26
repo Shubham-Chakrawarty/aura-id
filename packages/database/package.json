@@ -28,6 +28,7 @@
     "db:pull": "prisma db pull",
     "db:reset": "prisma db reset",
     "db:seed": "prisma db seed",
+    "db:studio": "prisma studio",
     "// --- Core Workflow ---": "",
     "build": "tsc",
     "dev": "tsc --watch",
@@ -49,6 +50,7 @@
     "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^7.2.0",
     "dotenv": "^17.2.3",
+    "argon2": "^0.44.0",
     "pg": "^8.17.1",
     "zod": "^4.3.5"
   }
