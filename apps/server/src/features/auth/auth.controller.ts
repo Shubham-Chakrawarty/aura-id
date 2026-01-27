@@ -19,12 +19,11 @@ export class AuthController {
     next: NextFunction,
   ) => {
     try {
-      // Named 'registration' to clarify this is the result of the process
-      const registration = await this._registerService.execute(req.body);
+      const result = await this._registerService.execute(req.body);
 
       return sendSuccess(res, {
         message: 'Account created. Please verify your email to continue.',
-        data: { user: registration.user },
+        data: result,
         statusCode: 201,
       });
     } catch (err) {

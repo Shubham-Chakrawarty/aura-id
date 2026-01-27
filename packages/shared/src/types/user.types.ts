@@ -5,14 +5,17 @@ export type SafeUser = {
   firstName: string;
   lastName: string;
   isEmailVerified: boolean;
-  avatarUrl: string | null;
-  createdAt: Date;
-  updatedAt: Date;
+  avatar: {
+    initials: string;
+    bgColor: string;
+    url: string | null;
+  };
+  joinedAt: Date;
   metadata: Record<string, unknown>;
 };
 
 // 2. The Application Context (The "Visa")
-export type UserContext = {
+export type SafeMembership = {
   id: string;
   role: string;
   metadata: Record<string, unknown>;
@@ -20,6 +23,7 @@ export type UserContext = {
 };
 
 // 3. The Combined Type for Logged-in Users
-export type SafeUserWithContext = SafeUser & {
-  context: UserContext;
+export type SafeUserWithMembership = {
+  user: SafeUser;
+  membership: SafeMembership;
 };

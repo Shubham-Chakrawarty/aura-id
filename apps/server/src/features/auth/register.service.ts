@@ -20,9 +20,9 @@ export class RegisterService {
     });
 
     if (!reponse)
-      throw new AppError('Application not found', 400, 'APPLICATION_NOT_FOUND');
+      throw new AppError('Application not found', 404, 'APPLICATION_NOT_FOUND');
 
-    return { user: toSafeUser(reponse.user, reponse.membership) };
+    return toSafeUser(reponse.user, reponse.membership);
   };
 }
 
